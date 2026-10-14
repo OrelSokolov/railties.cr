@@ -1,0 +1,13 @@
+sh_default_x_frame_options	"SAMEORIGIN"
+sh_default_x_xss_protection	"0"
+sh_default_x_content_type_options	"nosniff"
+sh_default_x_permitted_cross_domain_policies	"none"
+sh_default_referrer_policy	"strict-origin-when-cross-origin"
+sh_default_content_security_policy	nil
+sh_default_content_security_policy_report_only	nil
+sh_csp_header	"default-src 'self' https:; font-src 'self' https: data:; img-src 'self' https: data:; object-src 'none'; script-src 'self'; style-src 'self' https:; report-uri /csp-violation-report-endpoint"
+sh_csp_report_only_header	nil
+sh_csp_symbol_mapping	"default-src 'none'; script-src 'self' 'unsafe-inline' 'unsafe-eval' blob: ws: wss:; style-src https://fonts.example.com data:; connect-src *"
+sh_report_only_mode	"default-src 'self'"
+sh_report_only_no_enforce	nil
+sh_default_header_override	"DENY"

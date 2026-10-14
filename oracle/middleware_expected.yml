@@ -1,0 +1,27 @@
+default_stack_names	ActionDispatch::HostAuthorization,Rack::Sendfile,ActionDispatch::Static,Propshaft::Server,ActionDispatch::Executor,ActionDispatch::ServerTiming,ActiveSupport::Cache::Strategy::LocalCache,Rack::Runtime,Rack::MethodOverride,OracleHeaderMiddleware,ActionDispatch::RequestId,ActionDispatch::RemoteIp,Propshaft::QuietAssets,Rails::Rack::Logger,ActionDispatch::ShowExceptions,ActionDispatch::DebugExceptions,ActionDispatch::ActionableExceptions,ActionDispatch::Reloader,ActionDispatch::Callbacks,ActiveRecord::Migration::CheckPending,ActionDispatch::Cookies,ActionDispatch::Session::CookieStore,ActionDispatch::Flash,ActionDispatch::ContentSecurityPolicy::Middleware,Rack::Head,Rack::ConditionalGet,Rack::ETag,Rack::TempfileReaper
+ops_use	One,Two
+ops_unshift	Three,One,Two
+ops_insert_before	One,Three,Two
+ops_insert_after	One,Three,Two
+ops_swap	Three,Two
+ops_delete	One
+ops_delete_missing_stays	One,Two
+ops_delete_bang_missing	raise:RuntimeError:No such middleware to remove: Two
+ops_move_before	Three,One,Two
+ops_move_after	One,Three,Two
+ops_insert_before_missing	raise:RuntimeError:No such middleware to insert before: Four
+ops_insert_after_missing	raise:RuntimeError:No such middleware to insert after: Four
+ops_swap_missing	raise:RuntimeError:No such middleware to insert before: Four
+ops_size_last_index	3:Three:One
+middleware_equality	true:false:true
+middleware_inspect	One
+build_head_class	One
+build_wires_app	Two
+head_up_status	200
+head_up_body_empty	empty
+head_up_content_type	text/html; charset=utf-8
+head_up_content_length	0
+head_up_x_request_id	UUID
+x_runtime_header	present
+x_runtime_format	NUM
+custom_insert_before_header	oracle-mw-1

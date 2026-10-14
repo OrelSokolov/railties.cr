@@ -1,0 +1,13 @@
+# Local development override: railties resolves framework shards via
+# path: siblings, while the shards themselves now declare each other
+# via github tags. One source per shard name is required, so pin the
+# whole graph to sibling checkouts here (see README, сборка монорепо).
+dependencies:
+  active_support_cr:
+    path: ../active_support.cr
+  action_view_cr:
+    path: ../action_view.cr
+  action_pack_cr:
+    path: ../action_pack.cr
+  importmap_cr:
+    path: ../importmap.cr

@@ -1,0 +1,2235 @@
+---
+help_generate:
+  steps:
+  - argv: rails generate
+    stdout: |+
+      Usage:
+        bin/rails generate GENERATOR [args] [options]
+
+      General options:
+        -h, [--help]     # Print generator's options and usage
+        -p, [--pretend]  # Run but do not make any changes
+        -f, [--force]    # Overwrite files that already exist
+        -s, [--skip]     # Skip files that already exist
+        -q, [--quiet]    # Suppress status output
+
+      Please choose a generator below.
+
+      Rails:
+        application_record
+        authentication
+        benchmark
+        channel
+        controller
+        generator
+        helper
+        integration_test
+        job
+        mailbox
+        mailer
+        migration
+        model
+        resource
+        scaffold
+        scaffold_controller
+        script
+        system_test
+        task
+
+      ActiveRecord:
+        active_record:application_record
+        active_record:multi_db
+
+      SolidCable:
+        solid_cable:install
+        solid_cable:update
+
+      SolidCache:
+        solid_cache:install
+
+      SolidQueue:
+        solid_queue:install
+        solid_queue:update
+
+      Stimulus:
+        stimulus
+
+      TestUnit:
+        test_unit:authentication
+        test_unit:channel
+        test_unit:generator
+        test_unit:install
+        test_unit:mailbox
+
+    stderr: ''
+    status: 0
+  files: {}
+help_model:
+  steps:
+  - argv: rails generate model --help
+    stdout: |
+      Usage:
+        bin/rails generate model NAME [field[:type][:index] field[:type][:index]] [options]
+
+      Options:
+            [--skip-namespace]                                            # Skip namespace (affects only isolated engines)
+                                                                          # Default: false
+            [--skip-collision-check]                                      # Skip collision check
+                                                                          # Default: false
+            [--force-plural], [--no-force-plural], [--skip-force-plural]  # Do not singularize the model name, even if it appears plural
+                                                                          # Default: false
+        -o, --orm=NAME                                                    # ORM to be invoked
+                                                                          # Default: active_record
+
+      ActiveRecord options:
+              [--migration], [--no-migration], [--skip-migration]     # Indicates when to generate migration
+                                                                      # Default: true
+              [--timestamps], [--no-timestamps], [--skip-timestamps]  # Indicates when to generate timestamps
+                                                                      # Default: true
+              [--parent=PARENT]                                       # The parent class for the generated model
+                                                                      # Default: ApplicationRecord
+              [--indexes], [--no-indexes], [--skip-indexes]           # Add indexes for references and belongs_to columns
+                                                                      # Default: true
+              [--primary-key-type=PRIMARY_KEY_TYPE]                   # The type for primary key
+        --db, [--database=DATABASE]                                   # The database for your model's migration. By default, the current environment's primary database is used.
+        -t,   [--test-framework=NAME]                                 # Test framework to be invoked
+                                                                      # Default: test_unit
+
+      TestUnit options:
+            [--fixture], [--no-fixture], [--skip-fixture]  # Indicates when to generate fixture
+                                                           # Default: true
+        -r, [--fixture-replacement=NAME]                   # Fixture replacement to be invoked
+
+      Runtime options:
+        -f, [--force]                                      # Overwrite files that already exist
+        -p, [--pretend], [--no-pretend], [--skip-pretend]  # Run but do not make any changes
+        -q, [--quiet], [--no-quiet], [--skip-quiet]        # Suppress status output
+        -s, [--skip], [--no-skip], [--skip-skip]           # Skip files that already exist
+
+      Description:
+          Generates a new model. Pass the model name, either CamelCased or
+          under_scored, and an optional list of attribute pairs as arguments.
+
+          Attribute pairs are field:type arguments specifying the
+          model's attributes. Timestamps are added by default, so you don't have to
+          specify them by hand as 'created_at:datetime updated_at:datetime'.
+
+          As a special case, specifying 'password:digest' will generate a
+          password_digest field of string type, and configure your generated model and
+          tests for use with Active Model has_secure_password (assuming the default ORM
+          and test framework are being used).
+
+          You don't have to think up every attribute up front, but it helps to
+          sketch out a few so you can start working with the model immediately.
+
+          This generator invokes your configured ORM and test framework, which
+          defaults to Active Record and TestUnit.
+
+          Finally, if --parent option is given, it's used as superclass of the
+          created model. This allows you create Single Table Inheritance models.
+
+          If you pass a namespaced model name (e.g. admin/account or Admin::Account)
+          then the generator will create a module with a table_name_prefix method
+          to prefix the model's table name with the module name (e.g. admin_accounts)
+
+      Available field types:
+
+          Just after the field name you can specify a type like text or boolean.
+          It will generate the column with the associated SQL type. For instance:
+
+              `bin/rails generate model post title:string body:text`
+
+          will generate a title column with a varchar type and a body column with a text
+          type. If no type is specified the string type will be used by default.
+          You can use the following types:
+
+              integer
+              primary_key
+              decimal
+              float
+              boolean
+              binary
+              string
+              text
+              date
+              time
+              datetime
+
+          You can also consider `references` as a kind of type. For instance, if you run:
+
+              `bin/rails generate model photo title:string album:references`
+
+          It will generate an `album_id` column. You should generate these kinds of fields when
+          you will use a `belongs_to` association, for instance. `references` also supports
+          polymorphism, you can enable polymorphism like this:
+
+              `bin/rails generate model product supplier:references{polymorphic}`
+
+          For integer, string, text and binary fields, an integer in curly braces will
+          be set as the limit:
+
+              `bin/rails generate model user pseudo:string{30}`
+
+          For decimal, two integers separated by a comma in curly braces will be used
+          for precision and scale:
+
+              `bin/rails generate model product 'price:decimal{10,2}'`
+
+          You can add a `:uniq` or `:index` suffix for unique or standard indexes
+          respectively:
+
+              `bin/rails generate model user pseudo:string:uniq`
+              `bin/rails generate model user pseudo:string:index`
+
+          You can combine any single curly brace option with the index options:
+
+              `bin/rails generate model user username:string{30}:uniq`
+              `bin/rails generate model product supplier:references{polymorphic}:index`
+
+          If you require a `password_digest` string column for use with
+          has_secure_password, you can specify `password:digest`:
+
+              `bin/rails generate model user password:digest`
+
+          If you require a `token` string column for use with
+          has_secure_token, you can specify `auth_token:token`:
+
+              `bin/rails generate model user auth_token:token`
+
+      Examples:
+          `bin/rails generate model account`
+
+              For Active Record and TestUnit it creates:
+
+                  Model:      app/models/account.rb
+                  Test:       test/models/account_test.rb
+                  Fixtures:   test/fixtures/accounts.yml
+                  Migration:  db/migrate/XXX_create_accounts.rb
+
+          `bin/rails generate model post title:string body:text published:boolean`
+
+              Creates a Post model with a string title, text body, and published flag.
+
+          `bin/rails generate model admin/account`
+
+              For Active Record and TestUnit it creates:
+
+                  Module:     app/models/admin.rb
+                  Model:      app/models/admin/account.rb
+                  Test:       test/models/admin/account_test.rb
+                  Fixtures:   test/fixtures/admin/accounts.yml
+                  Migration:  db/migrate/XXX_create_admin_accounts.rb
+    stderr: ''
+    status: 0
+  files: {}
+help_migration:
+  steps:
+  - argv: rails generate migration --help
+    stdout: |
+      Usage:
+        bin/rails generate migration NAME [field[:type][:index] field[:type][:index]] [options]
+
+      Options:
+            [--skip-namespace]        # Skip namespace (affects only isolated engines)
+                                      # Default: false
+            [--skip-collision-check]  # Skip collision check
+                                      # Default: false
+        -o, --orm=NAME                # ORM to be invoked
+                                      # Default: active_record
+
+      ActiveRecord options:
+              [--timestamps], [--no-timestamps], [--skip-timestamps]  # Indicates when to generate timestamps
+                                                                      # Default: true
+              [--primary-key-type=PRIMARY_KEY_TYPE]                   # The type for primary key
+        --db, [--database=DATABASE]                                   # The database for your migration. By default, the current environment's primary database is used.
+
+      Runtime options:
+        -f, [--force]                                      # Overwrite files that already exist
+        -p, [--pretend], [--no-pretend], [--skip-pretend]  # Run but do not make any changes
+        -q, [--quiet], [--no-quiet], [--skip-quiet]        # Suppress status output
+        -s, [--skip], [--no-skip], [--skip-skip]           # Skip files that already exist
+
+      Description:
+          Generates a new database migration. Pass the migration name, either
+          CamelCased or under_scored, and an optional list of attribute pairs as arguments.
+
+          A migration class is generated in db/migrate prefixed by a timestamp of the current date and time.
+
+          You can name your migration in either of these formats to generate add/remove
+          column lines from supplied attributes: add_{columns}_to_{table} or remove_{columns}_from_{table}.
+
+          A migration name containing JoinTable will generate join tables for use with
+          has_and_belongs_to_many associations.
+
+          You can also name your migration create_{table} along with any attributes to generate a regular table.
+
+      Examples:
+          `bin/rails generate migration add_ssl_flag`
+
+          If the current date is May 14, 2008 and the current time 09:09:12, this creates the AddSslFlag migration
+          db/migrate/TS_add_ssl_flag.rb
+
+          `bin/rails generate migration add_title_body_published_to_post title:string body:text published:boolean`
+
+          This will create db/migrate/TS_add_title_body_published_to_post.rb with this in the migration:
+
+            add_column :posts, :title, :string
+            add_column :posts, :body, :text
+            add_column :posts, :published, :boolean
+
+          `bin/rails generate migration create_media_join_table artists musics:uniq`
+
+          This will create a join table migration:
+
+          create_join_table :artists, :musics do |t|
+            # t.index [:artist_id, :music_id]
+            t.index [:music_id, :artist_id], unique: true
+          end
+
+          `bin/rails generate migration create_users email:string`
+
+          This will create the migration:
+
+          create_table :users do |t|
+            t.string :email
+            t.timestamps
+          end
+    stderr: ''
+    status: 0
+  files: {}
+help_scaffold:
+  steps:
+  - argv: rails generate scaffold --help
+    stdout: |
+      Usage:
+        bin/rails generate scaffold NAME [field[:type][:index] field[:type][:index]] [options]
+
+      Options:
+            [--skip-namespace]                                                  # Skip namespace (affects only isolated engines)
+                                                                                # Default: false
+            [--skip-collision-check]                                            # Skip collision check
+                                                                                # Default: false
+            [--force-plural], [--no-force-plural], [--skip-force-plural]        # Do not singularize the model name, even if it appears plural
+                                                                                # Default: false
+        -o, --orm=NAME                                                          # ORM to be invoked
+                                                                                # Default: active_record
+            [--model-name=MODEL_NAME]                                           # ModelName to be used
+            [--resource-route], [--no-resource-route], [--skip-resource-route]  # Indicates when to generate resource route
+                                                                                # Default: true
+            [--api], [--no-api], [--skip-api]                                   # Generate API-only controller and tests, with no view templates
+                                                                                # Default: false
+        -c, --scaffold-controller=NAME                                          # Scaffold controller to be invoked
+                                                                                # Default: scaffold_controller
+
+      ActiveRecord options:
+              [--migration], [--no-migration], [--skip-migration]     # Indicates when to generate migration
+                                                                      # Default: true
+              [--timestamps], [--no-timestamps], [--skip-timestamps]  # Indicates when to generate timestamps
+                                                                      # Default: true
+              [--parent=PARENT]                                       # The parent class for the generated model
+                                                                      # Default: ApplicationRecord
+              [--indexes], [--no-indexes], [--skip-indexes]           # Add indexes for references and belongs_to columns
+                                                                      # Default: true
+              [--primary-key-type=PRIMARY_KEY_TYPE]                   # The type for primary key
+        --db, [--database=DATABASE]                                   # The database for your model's migration. By default, the current environment's primary database is used.
+        -t,   [--test-framework=NAME]                                 # Test framework to be invoked
+                                                                      # Default: test_unit
+
+      TestUnit options:
+            [--fixture], [--no-fixture], [--skip-fixture]  # Indicates when to generate fixture
+                                                           # Default: true
+        -r, [--fixture-replacement=NAME]                   # Fixture replacement to be invoked
+            [--system-tests=SYSTEM_TESTS]                  # Generate system test files (set to 'true' to enable)
+
+      ScaffoldController options:
+            [--helper], [--no-helper], [--skip-helper]  # Indicates when to generate helper
+                                                        # Default: true
+            [--skip-routes]                             # Don't add routes to config/routes.rb.
+        -e, [--template-engine=NAME]                    # Template engine to be invoked
+                                                        # Default: erb
+
+      Runtime options:
+        -f, [--force]                                      # Overwrite files that already exist
+        -p, [--pretend], [--no-pretend], [--skip-pretend]  # Run but do not make any changes
+        -q, [--quiet], [--no-quiet], [--skip-quiet]        # Suppress status output
+        -s, [--skip], [--no-skip], [--skip-skip]           # Skip files that already exist
+
+      Description:
+          Scaffolds an entire resource, from model and migration to controller and
+          views, along with a full test suite. The resource is ready to use as a
+          starting point for your RESTful, resource-oriented application.
+
+          Pass the name of the model (in singular form), either CamelCased or
+          under_scored, as the first argument, and an optional list of attribute
+          pairs.
+
+          Attributes are field arguments specifying the model's attributes. You can
+          optionally pass the type and an index to each field. For instance:
+          'title body:text tracking_id:integer:uniq' will generate a title field of
+          string type, a body with text type and a tracking_id as an integer with an
+          unique index. "index" could also be given instead of "uniq" if one desires
+          a non unique index.
+
+          As a special case, specifying 'password:digest' will generate a
+          password_digest field of string type, and configure your generated model,
+          controller, views, and test suite for use with Active Model
+          has_secure_password (assuming they are using Rails defaults).
+
+          Timestamps are added by default, so you don't have to specify them by hand
+          as 'created_at:datetime updated_at:datetime'.
+
+          You don't have to think up every attribute up front, but it helps to
+          sketch out a few so you can start working with the resource immediately.
+
+          For example, 'scaffold post title body:text published:boolean' gives
+          you a model with those three attributes, a controller that handles
+          the create/show/update/destroy, forms to create and edit your posts, and
+          an index that lists them all, as well as a resources :posts declaration
+          in config/routes.rb.
+
+          If you want to remove all the generated files, run
+          'bin/rails destroy scaffold ModelName'.
+
+      Examples:
+          `bin/rails generate scaffold post`
+          `bin/rails generate scaffold post title:string body:text published:boolean`
+          `bin/rails generate scaffold purchase amount:decimal tracking_id:integer:uniq`
+          `bin/rails generate scaffold user email:uniq password:digest`
+    stderr: ''
+    status: 0
+  files: {}
+model_basic:
+  steps:
+  - argv: rails g model Post title:string body:text published:boolean
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_create_posts.rb
+            create    app/models/post.rb
+            invoke    test_unit
+            create      test/models/post_test.rb
+            create      test/fixtures/posts.yml
+    stderr: ''
+    status: 0
+  files:
+    app/models/post.rb:
+      state: created
+      content: |
+        class Post < ApplicationRecord
+        end
+    db/migrate/20261005085234_create_posts.rb:
+      state: created
+      content: |
+        class CreatePosts < ActiveRecord::Migration[8.1]
+          def change
+            create_table :posts do |t|
+              t.string :title
+              t.text :body
+              t.boolean :published
+
+              t.timestamps
+            end
+          end
+        end
+    test/fixtures/posts.yml:
+      state: created
+      content: |
+        # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+        one:
+          title: MyString
+          body: MyText
+          published: false
+
+        two:
+          title: MyString
+          body: MyText
+          published: false
+    test/models/post_test.rb:
+      state: created
+      content: |
+        require "test_helper"
+
+        class PostTest < ActiveSupport::TestCase
+          # test "the truth" do
+          #   assert true
+          # end
+        end
+model_reference:
+  steps:
+  - argv: rails g model Comment body:text post:references
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_create_comments.rb
+            create    app/models/comment.rb
+            invoke    test_unit
+            create      test/models/comment_test.rb
+            create      test/fixtures/comments.yml
+    stderr: ''
+    status: 0
+  files:
+    app/models/comment.rb:
+      state: created
+      content: |
+        class Comment < ApplicationRecord
+          belongs_to :post
+        end
+    db/migrate/20261005085235_create_comments.rb:
+      state: created
+      content: |
+        class CreateComments < ActiveRecord::Migration[8.1]
+          def change
+            create_table :comments do |t|
+              t.text :body
+              t.references :post, null: false, foreign_key: true
+
+              t.timestamps
+            end
+          end
+        end
+    test/fixtures/comments.yml:
+      state: created
+      content: |
+        # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+        one:
+          body: MyText
+          post: one
+
+        two:
+          body: MyText
+          post: two
+    test/models/comment_test.rb:
+      state: created
+      content: |
+        require "test_helper"
+
+        class CommentTest < ActiveSupport::TestCase
+          # test "the truth" do
+          #   assert true
+          # end
+        end
+model_polymorphic:
+  steps:
+  - argv: rails g model Tagging tag:references{polymorphic}
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_create_taggings.rb
+            create    app/models/tagging.rb
+            invoke    test_unit
+            create      test/models/tagging_test.rb
+            create      test/fixtures/taggings.yml
+    stderr: ''
+    status: 0
+  files:
+    app/models/tagging.rb:
+      state: created
+      content: |
+        class Tagging < ApplicationRecord
+          belongs_to :tag, polymorphic: true
+        end
+    db/migrate/20261005085236_create_taggings.rb:
+      state: created
+      content: |
+        class CreateTaggings < ActiveRecord::Migration[8.1]
+          def change
+            create_table :taggings do |t|
+              t.references :tag, polymorphic: true, null: false
+
+              t.timestamps
+            end
+          end
+        end
+    test/fixtures/taggings.yml:
+      state: created
+      content: |
+        # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+        one:
+          tag: one
+          tag_type: Tag
+
+        two:
+          tag: two
+          tag_type: Tag
+    test/models/tagging_test.rb:
+      state: created
+      content: |
+        require "test_helper"
+
+        class TaggingTest < ActiveSupport::TestCase
+          # test "the truth" do
+          #   assert true
+          # end
+        end
+model_modifiers:
+  steps:
+  - argv: rails g model Product name:string{50} price:decimal{10,2} sku:string:uniq
+      code:string:index
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_create_products.rb
+            create    app/models/product.rb
+            invoke    test_unit
+            create      test/models/product_test.rb
+            create      test/fixtures/products.yml
+    stderr: ''
+    status: 0
+  files:
+    app/models/product.rb:
+      state: created
+      content: |
+        class Product < ApplicationRecord
+        end
+    db/migrate/20261005085237_create_products.rb:
+      state: created
+      content: |
+        class CreateProducts < ActiveRecord::Migration[8.1]
+          def change
+            create_table :products do |t|
+              t.string :name, limit: 50
+              t.decimal :price, precision: 10, scale: 2
+              t.string :sku
+              t.string :code
+
+              t.timestamps
+            end
+            add_index :products, :sku, unique: true
+            add_index :products, :code
+          end
+        end
+    test/fixtures/products.yml:
+      state: created
+      content: |
+        # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+        one:
+          name: MyString
+          price: 9.99
+          sku: MyString
+          code: MyString
+
+        two:
+          name: MyString
+          price: 9.99
+          sku: MyString
+          code: MyString
+    test/models/product_test.rb:
+      state: created
+      content: |
+        require "test_helper"
+
+        class ProductTest < ActiveSupport::TestCase
+          # test "the truth" do
+          #   assert true
+          # end
+        end
+model_types:
+  steps:
+  - argv: rails g model Event starts_at:datetime ratio:decimal score:float held_on:date
+      opens_at:time
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_create_events.rb
+            create    app/models/event.rb
+            invoke    test_unit
+            create      test/models/event_test.rb
+            create      test/fixtures/events.yml
+    stderr: ''
+    status: 0
+  files:
+    app/models/event.rb:
+      state: created
+      content: |
+        class Event < ApplicationRecord
+        end
+    db/migrate/20261005085237_create_events.rb:
+      state: created
+      content: |
+        class CreateEvents < ActiveRecord::Migration[8.1]
+          def change
+            create_table :events do |t|
+              t.datetime :starts_at
+              t.decimal :ratio
+              t.float :score
+              t.date :held_on
+              t.time :opens_at
+
+              t.timestamps
+            end
+          end
+        end
+    test/fixtures/events.yml:
+      state: created
+      content: |
+        # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+        one:
+          starts_at: 2026-10-05 11:52:37
+          ratio: 9.99
+          score: 1.5
+          held_on: 2026-10-05
+          opens_at: 2026-10-05 11:52:37
+
+        two:
+          starts_at: 2026-10-05 11:52:37
+          ratio: 9.99
+          score: 1.5
+          held_on: 2026-10-05
+          opens_at: 2026-10-05 11:52:37
+    test/models/event_test.rb:
+      state: created
+      content: |
+        require "test_helper"
+
+        class EventTest < ActiveSupport::TestCase
+          # test "the truth" do
+          #   assert true
+          # end
+        end
+model_namespace:
+  steps:
+  - argv: rails g model Admin::User email:string
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_create_admin_users.rb
+            create    app/models/admin/user.rb
+            create    app/models/admin.rb
+            invoke    test_unit
+            create      test/models/admin/user_test.rb
+            create      test/fixtures/admin/users.yml
+    stderr: ''
+    status: 0
+  files:
+    app/models/admin.rb:
+      state: created
+      content: |
+        module Admin
+          def self.table_name_prefix
+            "admin_"
+          end
+        end
+    app/models/admin/user.rb:
+      state: created
+      content: |
+        class Admin::User < ApplicationRecord
+        end
+    db/migrate/20261005085238_create_admin_users.rb:
+      state: created
+      content: |
+        class CreateAdminUsers < ActiveRecord::Migration[8.1]
+          def change
+            create_table :admin_users do |t|
+              t.string :email
+
+              t.timestamps
+            end
+          end
+        end
+    test/fixtures/admin/users.yml:
+      state: created
+      content: |
+        # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+        one:
+          email: MyString
+
+        two:
+          email: MyString
+    test/models/admin/user_test.rb:
+      state: created
+      content: |
+        require "test_helper"
+
+        class Admin::UserTest < ActiveSupport::TestCase
+          # test "the truth" do
+          #   assert true
+          # end
+        end
+model_no_migration:
+  steps:
+  - argv: rails g model Post title:string --no-migration
+    stdout: |2
+            invoke  active_record
+            create    app/models/post.rb
+            invoke    test_unit
+            create      test/models/post_test.rb
+            create      test/fixtures/posts.yml
+    stderr: ''
+    status: 0
+  files:
+    app/models/post.rb:
+      state: created
+      content: |
+        class Post < ApplicationRecord
+        end
+    test/fixtures/posts.yml:
+      state: created
+      content: |
+        # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+        one:
+          title: MyString
+
+        two:
+          title: MyString
+    test/models/post_test.rb:
+      state: created
+      content: |
+        require "test_helper"
+
+        class PostTest < ActiveSupport::TestCase
+          # test "the truth" do
+          #   assert true
+          # end
+        end
+model_no_timestamps:
+  steps:
+  - argv: rails g model Post title:string --no-timestamps
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_create_posts.rb
+            create    app/models/post.rb
+            invoke    test_unit
+            create      test/models/post_test.rb
+            create      test/fixtures/posts.yml
+    stderr: ''
+    status: 0
+  files:
+    app/models/post.rb:
+      state: created
+      content: |
+        class Post < ApplicationRecord
+        end
+    db/migrate/20261005085240_create_posts.rb:
+      state: created
+      content: |
+        class CreatePosts < ActiveRecord::Migration[8.1]
+          def change
+            create_table :posts do |t|
+              t.string :title
+
+            end
+          end
+        end
+    test/fixtures/posts.yml:
+      state: created
+      content: |
+        # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+        one:
+          title: MyString
+
+        two:
+          title: MyString
+    test/models/post_test.rb:
+      state: created
+      content: |
+        require "test_helper"
+
+        class PostTest < ActiveSupport::TestCase
+          # test "the truth" do
+          #   assert true
+          # end
+        end
+model_no_indexes:
+  steps:
+  - argv: rails g model Comment body:text post:references --no-indexes
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_create_comments.rb
+            create    app/models/comment.rb
+            invoke    test_unit
+            create      test/models/comment_test.rb
+            create      test/fixtures/comments.yml
+    stderr: ''
+    status: 0
+  files:
+    app/models/comment.rb:
+      state: created
+      content: |
+        class Comment < ApplicationRecord
+          belongs_to :post
+        end
+    db/migrate/20261005085241_create_comments.rb:
+      state: created
+      content: |
+        class CreateComments < ActiveRecord::Migration[8.1]
+          def change
+            create_table :comments do |t|
+              t.text :body
+              t.references :post, null: false, foreign_key: true
+
+              t.timestamps
+            end
+          end
+        end
+    test/fixtures/comments.yml:
+      state: created
+      content: |
+        # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+        one:
+          body: MyText
+          post: one
+
+        two:
+          body: MyText
+          post: two
+    test/models/comment_test.rb:
+      state: created
+      content: |
+        require "test_helper"
+
+        class CommentTest < ActiveSupport::TestCase
+          # test "the truth" do
+          #   assert true
+          # end
+        end
+model_no_fixture:
+  steps:
+  - argv: rails g model Post title:string --no-fixture
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_create_posts.rb
+            create    app/models/post.rb
+            invoke    test_unit
+            create      test/models/post_test.rb
+    stderr: ''
+    status: 0
+  files:
+    app/models/post.rb:
+      state: created
+      content: |
+        class Post < ApplicationRecord
+        end
+    db/migrate/20261005085241_create_posts.rb:
+      state: created
+      content: |
+        class CreatePosts < ActiveRecord::Migration[8.1]
+          def change
+            create_table :posts do |t|
+              t.string :title
+
+              t.timestamps
+            end
+          end
+        end
+    test/models/post_test.rb:
+      state: created
+      content: |
+        require "test_helper"
+
+        class PostTest < ActiveSupport::TestCase
+          # test "the truth" do
+          #   assert true
+          # end
+        end
+model_pretend:
+  steps:
+  - argv: rails g model Post title:string --pretend
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_create_posts.rb
+            create    app/models/post.rb
+            invoke    test_unit
+            create      test/models/post_test.rb
+            create      test/fixtures/posts.yml
+    stderr: ''
+    status: 0
+  files: {}
+model_twice:
+  steps:
+  - argv: rails g model Post title:string
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_create_posts.rb
+            create    app/models/post.rb
+            invoke    test_unit
+            create      test/models/post_test.rb
+            create      test/fixtures/posts.yml
+    stderr: ''
+    status: 0
+  - argv: rails g model Post title:string
+    stdout: "      invoke  active_record\n"
+    stderr: 'The name ''Post'' is either already used in your application or reserved
+      by Ruby on Rails. Please choose an alternative or use --skip-collision-check
+      or --force to skip this check and run this generator again.
+
+      '
+    status: 0
+  files:
+    app/models/post.rb:
+      state: created
+      content: |
+        class Post < ApplicationRecord
+        end
+    db/migrate/20261005085243_create_posts.rb:
+      state: created
+      content: |
+        class CreatePosts < ActiveRecord::Migration[8.1]
+          def change
+            create_table :posts do |t|
+              t.string :title
+
+              t.timestamps
+            end
+          end
+        end
+    test/fixtures/posts.yml:
+      state: created
+      content: |
+        # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+        one:
+          title: MyString
+
+        two:
+          title: MyString
+    test/models/post_test.rb:
+      state: created
+      content: |
+        require "test_helper"
+
+        class PostTest < ActiveSupport::TestCase
+          # test "the truth" do
+          #   assert true
+          # end
+        end
+model_force:
+  steps:
+  - argv: rails g model Post title:string
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_create_posts.rb
+            create    app/models/post.rb
+            invoke    test_unit
+            create      test/models/post_test.rb
+            create      test/fixtures/posts.yml
+    stderr: ''
+    status: 0
+  - argv: rails g model Post title:string --force
+    stdout: |2
+            invoke  active_record
+         identical    db/migrate/TS_create_posts.rb
+         identical    app/models/post.rb
+            invoke    test_unit
+         identical      test/models/post_test.rb
+         identical      test/fixtures/posts.yml
+    stderr: ''
+    status: 0
+  files:
+    app/models/post.rb:
+      state: created
+      content: |
+        class Post < ApplicationRecord
+        end
+    db/migrate/20261005085245_create_posts.rb:
+      state: created
+      content: |
+        class CreatePosts < ActiveRecord::Migration[8.1]
+          def change
+            create_table :posts do |t|
+              t.string :title
+
+              t.timestamps
+            end
+          end
+        end
+    test/fixtures/posts.yml:
+      state: created
+      content: |
+        # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+        one:
+          title: MyString
+
+        two:
+          title: MyString
+    test/models/post_test.rb:
+      state: created
+      content: |
+        require "test_helper"
+
+        class PostTest < ActiveSupport::TestCase
+          # test "the truth" do
+          #   assert true
+          # end
+        end
+destroy_model:
+  steps:
+  - argv: rails g model Post title:string
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_create_posts.rb
+            create    app/models/post.rb
+            invoke    test_unit
+            create      test/models/post_test.rb
+            create      test/fixtures/posts.yml
+    stderr: ''
+    status: 0
+  - argv: rails destroy model Post title:string
+    stdout: |2
+            invoke  active_record
+            remove    db/migrate/TS_create_posts.rb
+            remove    app/models/post.rb
+            invoke    test_unit
+            remove      test/models/post_test.rb
+            remove      test/fixtures/posts.yml
+    stderr: ''
+    status: 0
+  files: {}
+mig_create:
+  steps:
+  - argv: rails g migration CreateProducts name:string
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_create_products.rb
+    stderr: ''
+    status: 0
+  files:
+    db/migrate/20261005085248_create_products.rb:
+      state: created
+      content: |
+        class CreateProducts < ActiveRecord::Migration[8.1]
+          def change
+            create_table :products do |t|
+              t.string :name
+
+              t.timestamps
+            end
+          end
+        end
+mig_add:
+  steps:
+  - argv: rails g migration AddTitleToPosts title:string:index
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_add_title_to_posts.rb
+    stderr: ''
+    status: 0
+  files:
+    db/migrate/20261005085249_add_title_to_posts.rb:
+      state: created
+      content: |
+        class AddTitleToPosts < ActiveRecord::Migration[8.1]
+          def change
+            add_column :posts, :title, :string
+            add_index :posts, :title
+          end
+        end
+mig_add_many:
+  steps:
+  - argv: rails g migration AddDetailsToPosts title:string views:integer
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_add_details_to_posts.rb
+    stderr: ''
+    status: 0
+  files:
+    db/migrate/20261005085250_add_details_to_posts.rb:
+      state: created
+      content: |
+        class AddDetailsToPosts < ActiveRecord::Migration[8.1]
+          def change
+            add_column :posts, :title, :string
+            add_column :posts, :views, :integer
+          end
+        end
+mig_add_ref:
+  steps:
+  - argv: rails g migration AddUserToPosts user:references
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_add_user_to_posts.rb
+    stderr: ''
+    status: 0
+  files:
+    db/migrate/20261005085250_add_user_to_posts.rb:
+      state: created
+      content: |
+        class AddUserToPosts < ActiveRecord::Migration[8.1]
+          def change
+            add_reference :posts, :user, null: false, foreign_key: true
+          end
+        end
+mig_add_poly:
+  steps:
+  - argv: rails g migration AddTagToProducts tag:references{polymorphic}
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_add_tag_to_products.rb
+    stderr: ''
+    status: 0
+  files:
+    db/migrate/20261005085251_add_tag_to_products.rb:
+      state: created
+      content: |
+        class AddTagToProducts < ActiveRecord::Migration[8.1]
+          def change
+            add_reference :products, :tag, polymorphic: true, null: false
+          end
+        end
+mig_remove:
+  steps:
+  - argv: rails g migration RemoveTitleFromPosts title:string
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_remove_title_from_posts.rb
+    stderr: ''
+    status: 0
+  files:
+    db/migrate/20261005085252_remove_title_from_posts.rb:
+      state: created
+      content: |
+        class RemoveTitleFromPosts < ActiveRecord::Migration[8.1]
+          def change
+            remove_column :posts, :title, :string
+          end
+        end
+mig_remove_many:
+  steps:
+  - argv: rails g migration RemoveFieldsFromPosts title:string body:text
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_remove_fields_from_posts.rb
+    stderr: ''
+    status: 0
+  files:
+    db/migrate/20261005085253_remove_fields_from_posts.rb:
+      state: created
+      content: |
+        class RemoveFieldsFromPosts < ActiveRecord::Migration[8.1]
+          def change
+            remove_column :posts, :title, :string
+            remove_column :posts, :body, :text
+          end
+        end
+mig_rename:
+  steps:
+  - argv: rails g migration RenameTitleToSubjectOnPosts
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_rename_title_to_subject_on_posts.rb
+    stderr: ''
+    status: 0
+  files:
+    db/migrate/20261005085254_rename_title_to_subject_on_posts.rb:
+      state: created
+      content: |
+        class RenameTitleToSubjectOnPosts < ActiveRecord::Migration[8.1]
+          def change
+          end
+        end
+mig_join:
+  steps:
+  - argv: rails g migration CreateJoinTableCoreMembersRooms
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_create_join_table_core_members_rooms.rb
+    stderr: ''
+    status: 0
+  files:
+    db/migrate/20261005085254_create_join_table_core_members_rooms.rb:
+      state: created
+      content: |
+        class CreateJoinTableCoreMembersRooms < ActiveRecord::Migration[8.1]
+          def change
+          end
+        end
+mig_plain:
+  steps:
+  - argv: rails g migration AddIndexToPostsOnTitle
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_add_index_to_posts_on_title.rb
+    stderr: ''
+    status: 0
+  files:
+    db/migrate/20261005085255_add_index_to_posts_on_title.rb:
+      state: created
+      content: |
+        class AddIndexToPostsOnTitle < ActiveRecord::Migration[8.1]
+          def change
+          end
+        end
+mig_polymorphic_model:
+  steps:
+  - argv: rails g model Picture imageable:references{polymorphic}
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_create_pictures.rb
+            create    app/models/picture.rb
+            invoke    test_unit
+            create      test/models/picture_test.rb
+            create      test/fixtures/pictures.yml
+    stderr: ''
+    status: 0
+  files:
+    app/models/picture.rb:
+      state: created
+      content: |
+        class Picture < ApplicationRecord
+          belongs_to :imageable, polymorphic: true
+        end
+    db/migrate/20261005085256_create_pictures.rb:
+      state: created
+      content: |
+        class CreatePictures < ActiveRecord::Migration[8.1]
+          def change
+            create_table :pictures do |t|
+              t.references :imageable, polymorphic: true, null: false
+
+              t.timestamps
+            end
+          end
+        end
+    test/fixtures/pictures.yml:
+      state: created
+      content: |
+        # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+        one:
+          imageable: one
+          imageable_type: Imageable
+
+        two:
+          imageable: two
+          imageable_type: Imageable
+    test/models/picture_test.rb:
+      state: created
+      content: |
+        require "test_helper"
+
+        class PictureTest < ActiveSupport::TestCase
+          # test "the truth" do
+          #   assert true
+          # end
+        end
+controller_basic:
+  steps:
+  - argv: rails g controller Posts
+    stdout: |2
+            create  app/controllers/posts_controller.rb
+            invoke  erb
+            create    app/views/posts
+            invoke  test_unit
+            create    test/controllers/posts_controller_test.rb
+            invoke  helper
+            create    app/helpers/posts_helper.rb
+            invoke    test_unit
+    stderr: ''
+    status: 0
+  files:
+    app/controllers/posts_controller.rb:
+      state: created
+      content: |
+        class PostsController < ApplicationController
+        end
+    app/helpers/posts_helper.rb:
+      state: created
+      content: |
+        module PostsHelper
+        end
+    test/controllers/posts_controller_test.rb:
+      state: created
+      content: |
+        require "test_helper"
+
+        class PostsControllerTest < ActionDispatch::IntegrationTest
+          # test "the truth" do
+          #   assert true
+          # end
+        end
+controller_actions:
+  steps:
+  - argv: rails g controller Comments show create
+    stdout: |2
+            create  app/controllers/comments_controller.rb
+             route  get "comments/show"
+                    get "comments/create"
+            invoke  erb
+            create    app/views/comments
+            create    app/views/comments/show.html.erb
+            create    app/views/comments/create.html.erb
+            invoke  test_unit
+            create    test/controllers/comments_controller_test.rb
+            invoke  helper
+            create    app/helpers/comments_helper.rb
+            invoke    test_unit
+    stderr: ''
+    status: 0
+  files:
+    app/controllers/comments_controller.rb:
+      state: created
+      content: |
+        class CommentsController < ApplicationController
+          def show
+          end
+
+          def create
+          end
+        end
+    app/helpers/comments_helper.rb:
+      state: created
+      content: |
+        module CommentsHelper
+        end
+    app/views/comments/create.html.erb:
+      state: created
+      content: |
+        <h1>Comments#create</h1>
+        <p>Find me in app/views/comments/create.html.erb</p>
+    app/views/comments/show.html.erb:
+      state: created
+      content: |
+        <h1>Comments#show</h1>
+        <p>Find me in app/views/comments/show.html.erb</p>
+    config/routes.rb:
+      state: changed
+      content: |
+        Rails.application.routes.draw do
+          get "comments/show"
+          get "comments/create"
+          # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+
+          # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
+          # Can be used by load balancers and uptime monitors to verify that the app is live.
+          get "up" => "rails/health#show", as: :rails_health_check
+
+          # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
+          # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
+          # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
+
+          # Defines the root path route ("/")
+          # root "posts#index"
+        end
+    test/controllers/comments_controller_test.rb:
+      state: created
+      content: |
+        require "test_helper"
+
+        class CommentsControllerTest < ActionDispatch::IntegrationTest
+          test "should get show" do
+            get comments_show_url
+            assert_response :success
+          end
+
+          test "should get create" do
+            get comments_create_url
+            assert_response :success
+          end
+        end
+controller_skip:
+  steps:
+  - argv: rails g controller Posts index
+    stdout: |2
+            create  app/controllers/posts_controller.rb
+             route  get "posts/index"
+            invoke  erb
+            create    app/views/posts
+            create    app/views/posts/index.html.erb
+            invoke  test_unit
+            create    test/controllers/posts_controller_test.rb
+            invoke  helper
+            create    app/helpers/posts_helper.rb
+            invoke    test_unit
+    stderr: ''
+    status: 0
+  - argv: rails g controller Posts index --skip
+    stdout: ''
+    stderr: 'The name ''PostsController'' is either already used in your application
+      or reserved by Ruby on Rails. Please choose an alternative or use --skip-collision-check
+      or --force to skip this check and run this generator again.
+
+      '
+    status: 0
+  files:
+    app/controllers/posts_controller.rb:
+      state: created
+      content: |
+        class PostsController < ApplicationController
+          def index
+          end
+        end
+    app/helpers/posts_helper.rb:
+      state: created
+      content: |
+        module PostsHelper
+        end
+    app/views/posts/index.html.erb:
+      state: created
+      content: |
+        <h1>Posts#index</h1>
+        <p>Find me in app/views/posts/index.html.erb</p>
+    config/routes.rb:
+      state: changed
+      content: |
+        Rails.application.routes.draw do
+          get "posts/index"
+          # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+
+          # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
+          # Can be used by load balancers and uptime monitors to verify that the app is live.
+          get "up" => "rails/health#show", as: :rails_health_check
+
+          # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
+          # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
+          # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
+
+          # Defines the root path route ("/")
+          # root "posts#index"
+        end
+    test/controllers/posts_controller_test.rb:
+      state: created
+      content: |
+        require "test_helper"
+
+        class PostsControllerTest < ActionDispatch::IntegrationTest
+          test "should get index" do
+            get posts_index_url
+            assert_response :success
+          end
+        end
+destroy_controller:
+  steps:
+  - argv: rails g controller Posts index show
+    stdout: |2
+            create  app/controllers/posts_controller.rb
+             route  get "posts/index"
+                    get "posts/show"
+            invoke  erb
+            create    app/views/posts
+            create    app/views/posts/index.html.erb
+            create    app/views/posts/show.html.erb
+            invoke  test_unit
+            create    test/controllers/posts_controller_test.rb
+            invoke  helper
+            create    app/helpers/posts_helper.rb
+            invoke    test_unit
+    stderr: ''
+    status: 0
+  - argv: rails destroy controller Posts index show
+    stdout: |2
+            remove  app/controllers/posts_controller.rb
+             route  get "posts/index"
+                    get "posts/show"
+            invoke  erb
+            remove    app/views/posts
+            remove    app/views/posts/index.html.erb
+            remove    app/views/posts/show.html.erb
+            invoke  test_unit
+            remove    test/controllers/posts_controller_test.rb
+            invoke  helper
+            remove    app/helpers/posts_helper.rb
+            invoke    test_unit
+    stderr: ''
+    status: 0
+  files: {}
+scaffold_post:
+  steps:
+  - argv: rails g scaffold Post title:string body:text published:boolean
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_create_posts.rb
+            create    app/models/post.rb
+            invoke    test_unit
+            create      test/models/post_test.rb
+            create      test/fixtures/posts.yml
+            invoke  resource_route
+             route    resources :posts
+            invoke  scaffold_controller
+            create    app/controllers/posts_controller.rb
+            invoke    erb
+            create      app/views/posts
+            create      app/views/posts/index.html.erb
+            create      app/views/posts/edit.html.erb
+            create      app/views/posts/show.html.erb
+            create      app/views/posts/new.html.erb
+            create      app/views/posts/_form.html.erb
+            create      app/views/posts/_post.html.erb
+            invoke    resource_route
+            invoke    test_unit
+            create      test/controllers/posts_controller_test.rb
+            invoke    helper
+            create      app/helpers/posts_helper.rb
+            invoke      test_unit
+    stderr: ''
+    status: 0
+  files:
+    app/controllers/posts_controller.rb:
+      state: created
+      content: |
+        class PostsController < ApplicationController
+          before_action :set_post, only: %i[ show edit update destroy ]
+
+          # GET /posts
+          def index
+            @posts = Post.all
+          end
+
+          # GET /posts/1
+          def show
+          end
+
+          # GET /posts/new
+          def new
+            @post = Post.new
+          end
+
+          # GET /posts/1/edit
+          def edit
+          end
+
+          # POST /posts
+          def create
+            @post = Post.new(post_params)
+
+            if @post.save
+              redirect_to @post, notice: "Post was successfully created."
+            else
+              render :new, status: :unprocessable_content
+            end
+          end
+
+          # PATCH/PUT /posts/1
+          def update
+            if @post.update(post_params)
+              redirect_to @post, notice: "Post was successfully updated.", status: :see_other
+            else
+              render :edit, status: :unprocessable_content
+            end
+          end
+
+          # DELETE /posts/1
+          def destroy
+            @post.destroy!
+            redirect_to posts_path, notice: "Post was successfully destroyed.", status: :see_other
+          end
+
+          private
+            # Use callbacks to share common setup or constraints between actions.
+            def set_post
+              @post = Post.find(params.expect(:id))
+            end
+
+            # Only allow a list of trusted parameters through.
+            def post_params
+              params.expect(post: [ :title, :body, :published ])
+            end
+        end
+    app/helpers/posts_helper.rb:
+      state: created
+      content: |
+        module PostsHelper
+        end
+    app/models/post.rb:
+      state: created
+      content: |
+        class Post < ApplicationRecord
+        end
+    app/views/posts/_form.html.erb:
+      state: created
+      content: |
+        <%= form_with(model: post) do |form| %>
+          <% if post.errors.any? %>
+            <div style="color: red">
+              <h2><%= pluralize(post.errors.count, "error") %> prohibited this post from being saved:</h2>
+
+              <ul>
+                <% post.errors.each do |error| %>
+                  <li><%= error.full_message %></li>
+                <% end %>
+              </ul>
+            </div>
+          <% end %>
+
+          <div>
+            <%= form.label :title, style: "display: block" %>
+            <%= form.text_field :title %>
+          </div>
+
+          <div>
+            <%= form.label :body, style: "display: block" %>
+            <%= form.textarea :body %>
+          </div>
+
+          <div>
+            <%= form.label :published, style: "display: block" %>
+            <%= form.checkbox :published %>
+          </div>
+
+          <div>
+            <%= form.submit %>
+          </div>
+        <% end %>
+    app/views/posts/_post.html.erb:
+      state: created
+      content: |
+        <div id="<%= dom_id post %>">
+          <div>
+            <strong>Title:</strong>
+            <%= post.title %>
+          </div>
+
+          <div>
+            <strong>Body:</strong>
+            <%= post.body %>
+          </div>
+
+          <div>
+            <strong>Published:</strong>
+            <%= post.published %>
+          </div>
+
+        </div>
+    app/views/posts/edit.html.erb:
+      state: created
+      content: |
+        <% content_for :title, "Editing post" %>
+
+        <h1>Editing post</h1>
+
+        <%= render "form", post: @post %>
+
+        <br>
+
+        <div>
+          <%= link_to "Show this post", @post %> |
+          <%= link_to "Back to posts", posts_path %>
+        </div>
+    app/views/posts/index.html.erb:
+      state: created
+      content: |
+        <p style="color: green"><%= notice %></p>
+
+        <% content_for :title, "Posts" %>
+
+        <h1>Posts</h1>
+
+        <div id="posts">
+          <% @posts.each do |post| %>
+            <%= render post %>
+            <p>
+              <%= link_to "Show this post", post %>
+            </p>
+          <% end %>
+        </div>
+
+        <%= link_to "New post", new_post_path %>
+    app/views/posts/new.html.erb:
+      state: created
+      content: |
+        <% content_for :title, "New post" %>
+
+        <h1>New post</h1>
+
+        <%= render "form", post: @post %>
+
+        <br>
+
+        <div>
+          <%= link_to "Back to posts", posts_path %>
+        </div>
+    app/views/posts/show.html.erb:
+      state: created
+      content: |
+        <p style="color: green"><%= notice %></p>
+
+        <%= render @post %>
+
+        <div>
+          <%= link_to "Edit this post", edit_post_path(@post) %> |
+          <%= link_to "Back to posts", posts_path %>
+
+          <%= button_to "Destroy this post", @post, method: :delete %>
+        </div>
+    config/routes.rb:
+      state: changed
+      content: |
+        Rails.application.routes.draw do
+          resources :posts
+          # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
+
+          # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
+          # Can be used by load balancers and uptime monitors to verify that the app is live.
+          get "up" => "rails/health#show", as: :rails_health_check
+
+          # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
+          # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
+          # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
+
+          # Defines the root path route ("/")
+          # root "posts#index"
+        end
+    db/migrate/20261005085301_create_posts.rb:
+      state: created
+      content: |
+        class CreatePosts < ActiveRecord::Migration[8.1]
+          def change
+            create_table :posts do |t|
+              t.string :title
+              t.text :body
+              t.boolean :published
+
+              t.timestamps
+            end
+          end
+        end
+    test/controllers/posts_controller_test.rb:
+      state: created
+      content: |
+        require "test_helper"
+
+        class PostsControllerTest < ActionDispatch::IntegrationTest
+          setup do
+            @post = posts(:one)
+          end
+
+          test "should get index" do
+            get posts_url
+            assert_response :success
+          end
+
+          test "should get new" do
+            get new_post_url
+            assert_response :success
+          end
+
+          test "should create post" do
+            assert_difference("Post.count") do
+              post posts_url, params: { post: { body: @post.body, published: @post.published, title: @post.title } }
+            end
+
+            assert_redirected_to post_url(Post.last)
+          end
+
+          test "should show post" do
+            get post_url(@post)
+            assert_response :success
+          end
+
+          test "should get edit" do
+            get edit_post_url(@post)
+            assert_response :success
+          end
+
+          test "should update post" do
+            patch post_url(@post), params: { post: { body: @post.body, published: @post.published, title: @post.title } }
+            assert_redirected_to post_url(@post)
+          end
+
+          test "should destroy post" do
+            assert_difference("Post.count", -1) do
+              delete post_url(@post)
+            end
+
+            assert_redirected_to posts_url
+          end
+        end
+    test/fixtures/posts.yml:
+      state: created
+      content: |
+        # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+        one:
+          title: MyString
+          body: MyText
+          published: false
+
+        two:
+          title: MyString
+          body: MyText
+          published: false
+    test/models/post_test.rb:
+      state: created
+      content: |
+        require "test_helper"
+
+        class PostTest < ActiveSupport::TestCase
+          # test "the truth" do
+          #   assert true
+          # end
+        end
+destroy_scaffold:
+  steps:
+  - argv: rails g scaffold Post title:string
+    stdout: |2
+            invoke  active_record
+            create    db/migrate/TS_create_posts.rb
+            create    app/models/post.rb
+            invoke    test_unit
+            create      test/models/post_test.rb
+            create      test/fixtures/posts.yml
+            invoke  resource_route
+             route    resources :posts
+            invoke  scaffold_controller
+            create    app/controllers/posts_controller.rb
+            invoke    erb
+            create      app/views/posts
+            create      app/views/posts/index.html.erb
+            create      app/views/posts/edit.html.erb
+            create      app/views/posts/show.html.erb
+            create      app/views/posts/new.html.erb
+            create      app/views/posts/_form.html.erb
+            create      app/views/posts/_post.html.erb
+            invoke    resource_route
+            invoke    test_unit
+            create      test/controllers/posts_controller_test.rb
+            invoke    helper
+            create      app/helpers/posts_helper.rb
+            invoke      test_unit
+    stderr: ''
+    status: 0
+  - argv: rails destroy scaffold Post title:string
+    stdout: |2
+            invoke  active_record
+            remove    db/migrate/TS_create_posts.rb
+            remove    app/models/post.rb
+            invoke    test_unit
+            remove      test/models/post_test.rb
+            remove      test/fixtures/posts.yml
+            invoke  resource_route
+             route    resources :posts
+            invoke  scaffold_controller
+            remove    app/controllers/posts_controller.rb
+            invoke    erb
+            remove      app/views/posts
+            remove      app/views/posts/index.html.erb
+            remove      app/views/posts/edit.html.erb
+            remove      app/views/posts/show.html.erb
+            remove      app/views/posts/new.html.erb
+            remove      app/views/posts/_form.html.erb
+            remove      app/views/posts/_post.html.erb
+            invoke    resource_route
+            invoke    test_unit
+            remove      test/controllers/posts_controller_test.rb
+            invoke    helper
+            remove      app/helpers/posts_helper.rb
+            invoke      test_unit
+    stderr: ''
+    status: 0
+  files: {}
+mailer_basic:
+  steps:
+  - argv: rails g mailer UserMailer welcome farewell
+    stdout: |2
+            create  app/mailers/user_mailer.rb
+            invoke  erb
+            create    app/views/user_mailer
+            create    app/views/user_mailer/welcome.text.erb
+            create    app/views/user_mailer/welcome.html.erb
+            create    app/views/user_mailer/farewell.text.erb
+            create    app/views/user_mailer/farewell.html.erb
+            invoke  test_unit
+            create    test/mailers/user_mailer_test.rb
+            create    test/mailers/previews/user_mailer_preview.rb
+    stderr: ''
+    status: 0
+  files:
+    app/mailers/user_mailer.rb:
+      state: created
+      content: |
+        class UserMailer < ApplicationMailer
+          # Subject can be set in your I18n file at config/locales/en.yml
+          # with the following lookup:
+          #
+          #   en.user_mailer.welcome.subject
+          #
+          def welcome
+            @greeting = "Hi"
+
+            mail to: "to@example.org"
+          end
+
+          # Subject can be set in your I18n file at config/locales/en.yml
+          # with the following lookup:
+          #
+          #   en.user_mailer.farewell.subject
+          #
+          def farewell
+            @greeting = "Hi"
+
+            mail to: "to@example.org"
+          end
+        end
+    app/views/user_mailer/farewell.html.erb:
+      state: created
+      content: |
+        <h1>User#farewell</h1>
+
+        <p>
+          <%= @greeting %>, find me in app/views/user_mailer/farewell.html.erb
+        </p>
+    app/views/user_mailer/farewell.text.erb:
+      state: created
+      content: |
+        User#farewell
+
+        <%= @greeting %>, find me in app/views/user_mailer/farewell.text.erb
+    app/views/user_mailer/welcome.html.erb:
+      state: created
+      content: |
+        <h1>User#welcome</h1>
+
+        <p>
+          <%= @greeting %>, find me in app/views/user_mailer/welcome.html.erb
+        </p>
+    app/views/user_mailer/welcome.text.erb:
+      state: created
+      content: |
+        User#welcome
+
+        <%= @greeting %>, find me in app/views/user_mailer/welcome.text.erb
+    test/mailers/previews/user_mailer_preview.rb:
+      state: created
+      content: |
+        # Preview all emails at http://localhost:3000/rails/mailers/user_mailer
+        class UserMailerPreview < ActionMailer::Preview
+          # Preview this email at http://localhost:3000/rails/mailers/user_mailer/welcome
+          def welcome
+            UserMailer.welcome
+          end
+
+          # Preview this email at http://localhost:3000/rails/mailers/user_mailer/farewell
+          def farewell
+            UserMailer.farewell
+          end
+        end
+    test/mailers/user_mailer_test.rb:
+      state: created
+      content: |
+        require "test_helper"
+
+        class UserMailerTest < ActionMailer::TestCase
+          test "welcome" do
+            mail = UserMailer.welcome
+            assert_equal "Welcome", mail.subject
+            assert_equal [ "to@example.org" ], mail.to
+            assert_equal [ "from@example.com" ], mail.from
+            assert_match "Hi", mail.body.encoded
+          end
+
+          test "farewell" do
+            mail = UserMailer.farewell
+            assert_equal "Farewell", mail.subject
+            assert_equal [ "to@example.org" ], mail.to
+            assert_equal [ "from@example.com" ], mail.from
+            assert_match "Hi", mail.body.encoded
+          end
+        end
+destroy_mailer:
+  steps:
+  - argv: rails g mailer UserMailer welcome
+    stdout: |2
+            create  app/mailers/user_mailer.rb
+            invoke  erb
+            create    app/views/user_mailer
+            create    app/views/user_mailer/welcome.text.erb
+            create    app/views/user_mailer/welcome.html.erb
+            invoke  test_unit
+            create    test/mailers/user_mailer_test.rb
+            create    test/mailers/previews/user_mailer_preview.rb
+    stderr: ''
+    status: 0
+  - argv: rails destroy mailer UserMailer welcome
+    stdout: |2
+            remove  app/mailers/user_mailer.rb
+            invoke  erb
+            remove    app/views/user_mailer
+            remove    app/views/user_mailer/welcome.text.erb
+            remove    app/views/user_mailer/welcome.html.erb
+            invoke  test_unit
+            remove    test/mailers/user_mailer_test.rb
+            remove    test/mailers/previews/user_mailer_preview.rb
+    stderr: ''
+    status: 0
+  files: {}
+job_basic:
+  steps:
+  - argv: rails g job Cleanup
+    stdout: |2
+            invoke  test_unit
+            create    test/jobs/cleanup_job_test.rb
+            create  app/jobs/cleanup_job.rb
+    stderr: ''
+    status: 0
+  files:
+    app/jobs/cleanup_job.rb:
+      state: created
+      content: |
+        class CleanupJob < ApplicationJob
+          queue_as :default
+
+          def perform(*args)
+            # Do something later
+          end
+        end
+    test/jobs/cleanup_job_test.rb:
+      state: created
+      content: |
+        require "test_helper"
+
+        class CleanupJobTest < ActiveJob::TestCase
+          # test "the truth" do
+          #   assert true
+          # end
+        end
+channel_basic:
+  steps:
+  - argv: rails g channel Room
+    stdout: |2
+            invoke  test_unit
+            create    test/channels/room_channel_test.rb
+            create  app/channels/application_cable/channel.rb
+            create  app/channels/application_cable/connection.rb
+            create  app/channels/room_channel.rb
+            create  app/javascript/channels/index.js
+            create  app/javascript/channels/consumer.js
+            append  app/javascript/application.js
+            append  config/importmap.rb
+            create  app/javascript/channels/room_channel.js
+              gsub  app/javascript/channels/room_channel.js
+            append  app/javascript/channels/index.js
+    stderr: ''
+    status: 0
+  files:
+    app/channels/application_cable/channel.rb:
+      state: created
+      content: |
+        module ApplicationCable
+          class Channel < ActionCable::Channel::Base
+          end
+        end
+    app/channels/application_cable/connection.rb:
+      state: created
+      content: |
+        module ApplicationCable
+          class Connection < ActionCable::Connection::Base
+          end
+        end
+    app/channels/room_channel.rb:
+      state: created
+      content: |
+        class RoomChannel < ApplicationCable::Channel
+          def subscribed
+            # stream_from "some_channel"
+          end
+
+          def unsubscribed
+            # Any cleanup needed when channel is unsubscribed
+          end
+        end
+    app/javascript/application.js:
+      state: changed
+      content: |
+        // Configure your import map in config/importmap.rb. Read more: https://github.com/rails/importmap-rails
+        import "@hotwired/turbo-rails"
+        import "controllers"
+        import "channels"
+    app/javascript/channels/consumer.js:
+      state: created
+      content: |
+        // Action Cable provides the framework to deal with WebSockets in Rails.
+        // You can generate new channels where WebSocket features live using the `bin/rails generate channel` command.
+
+        import { createConsumer } from "@rails/actioncable"
+
+        export default createConsumer()
+    app/javascript/channels/index.js:
+      state: created
+      content: |
+        // Import all the channels to be used by Action Cable
+        import "channels/room_channel"
+    app/javascript/channels/room_channel.js:
+      state: created
+      content: |
+        import consumer from "channels/consumer"
+
+        consumer.subscriptions.create("RoomChannel", {
+          connected() {
+            // Called when the subscription is ready for use on the server
+          },
+
+          disconnected() {
+            // Called when the subscription has been terminated by the server
+          },
+
+          received(data) {
+            // Called when there's incoming data on the websocket for this channel
+          }
+        });
+    config/importmap.rb:
+      state: changed
+      content: |
+        # Pin npm packages by running ./bin/importmap
+
+        pin "application"
+        pin "@hotwired/turbo-rails", to: "turbo.min.js"
+        pin "@hotwired/stimulus", to: "stimulus.min.js"
+        pin "@hotwired/stimulus-loading", to: "stimulus-loading.js"
+        pin_all_from "app/javascript/controllers", under: "controllers"
+        pin "@rails/actioncable", to: "actioncable.esm.js"
+        pin_all_from "app/javascript/channels", under: "channels"
+    test/channels/room_channel_test.rb:
+      state: created
+      content: |
+        require "test_helper"
+
+        class RoomChannelTest < ActionCable::Channel::TestCase
+          # test "subscribes" do
+          #   subscribe
+          #   assert subscription.confirmed?
+          # end
+        end
+mailbox_basic:
+  steps:
+  - argv: rails g mailbox Reactions
+    stdout: |2
+            create  app/mailboxes/reactions_mailbox.rb
+            create  app/mailboxes/application_mailbox.rb
+            invoke  test_unit
+            create    test/mailboxes/reactions_mailbox_test.rb
+    stderr: ''
+    status: 0
+  files:
+    app/mailboxes/application_mailbox.rb:
+      state: created
+      content: |
+        class ApplicationMailbox < ActionMailbox::Base
+          # routing /something/i => :somewhere
+        end
+    app/mailboxes/reactions_mailbox.rb:
+      state: created
+      content: |
+        class ReactionsMailbox < ApplicationMailbox
+          def process
+          end
+        end
+    test/mailboxes/reactions_mailbox_test.rb:
+      state: created
+      content: |
+        require "test_helper"
+
+        class ReactionsMailboxTest < ActionMailbox::TestCase
+          # test "receive mail" do
+          #   receive_inbound_email_from_mail \
+          #     to: '"someone" <someone@example.com>',
+          #     from: '"else" <else@example.com>',
+          #     subject: "Hello world!",
+          #     body: "Hello?"
+          # end
+        end
+helper_basic:
+  steps:
+  - argv: rails g helper post
+    stdout: |2
+            create  app/helpers/post_helper.rb
+            invoke  test_unit
+    stderr: ''
+    status: 0
+  files:
+    app/helpers/post_helper.rb:
+      state: created
+      content: |
+        module PostHelper
+        end

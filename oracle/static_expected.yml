@@ -1,0 +1,13 @@
+js_200	200|text/javascript|||accept-encoding|console.log(1)\n
+css_200	200|text/css||||body{}\n
+png_200	200|image/png||||png
+index_html	200|text/html||||<h1>docs</h1>
+dot_html	200|text/html||||<h1>docs</h1>
+immutable_cache_control	200|text/javascript|public, max-age=31536000, immutable||accept-encoding|console.log(1)\n
+brotli_negotiated	200|text/javascript||br|accept-encoding|br-data
+gzip_negotiated	200|text/javascript||gzip|accept-encoding|gz-data
+no_accept_encoding_identity	200|text/javascript|||accept-encoding|console.log(1)\n
+missing_falls_through	404|text/plain||||404-fallback
+post_falls_through	404|text/plain||||404-fallback
+traversal_blocked	404|text/plain||||404-fallback
+head_served	200|text/javascript|||accept-encoding|
