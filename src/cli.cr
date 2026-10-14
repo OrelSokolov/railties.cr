@@ -128,6 +128,10 @@ module CRails
         db:rollback    Roll back the last migration (STEP=n)
         db:schema:dump Refresh db/schema.cr + db/schema.yml
         db:schema:load Recreate the database from db/schema.cr
+        assets:precompile  Compile assets into public/assets (digest names,
+                           .manifest.json, .gz/.br); assets:clean|clobber|reveal
+                           too. In an app: runs in the app environment
+                           (custom config.assets.paths visible)
         generate, g  Generate code: model controller scaffold migration mailer
                      job channel mailbox helper bot (`crails g` lists them)
         destroy, d   Undo a generator (`crails destroy model Post`)

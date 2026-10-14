@@ -11,6 +11,7 @@ require "./ssl"
 require "./secure_headers"
 require "./static"
 require "./propshaft_helper"
+require "./assets_commands"
 require "./nodelay_server"
 require "./vite_dev"
 require "./testing/integration"
@@ -270,7 +271,7 @@ module CRails
     # Static при существующем манифесте, иначе Dynamic (dev).
     def assets : Propshaft::Assembly
       @assets ||= begin
-        config.assets.paths = default_asset_paths if config.assets.paths.empty?
+        config.assets.paths = config.default_asset_paths if config.assets.paths.empty?
         Propshaft::Assembly.new(config.assets)
       end
     end
@@ -328,6 +329,8 @@ module CRails
       when "serve" then serve(argv.skip(1)) # skip(1), not [1..]: [][1..] raises
       when "routes" then print_routes
       when "middleware" then print_middleware
+      when .starts_with?("assets:")
+        cmd_assets(argv[0].split(':', 2)[1]? || "help", argv[1..])
       when "credentials:show" then cmd_credentials_show(argv.skip(1))
       when "credentials:edit" then cmd_credentials_edit(argv.skip(1))
       when "secret" then puts Random::Secure.hex(64)
@@ -360,9 +363,16 @@ module CRails
           exit 3
         end
       else
-        STDERR.puts "Usage: app [serve] [worker] [scheduler] [routes] [middleware] [bot:poll PLATFORM] [-p PORT] [-b HOST]"
+        STDERR.puts "Usage: app [serve] [worker] [scheduler] [routes] [middleware] [bot:poll PLATFORM] [assets:TASK] [-p PORT] [-b HOST]"
         exit 1
       end
+    end
+
+    # `bin/app assets:*` — таска выполняется в окружении приложения:
+    # кастомный config.assets.paths виден (как rake assets:precompile
+    # в Rails, грузящий environment; CLI-оболочка проксирует сюда).
+    def cmd_assets(task : String, rest : Array(String)) : Nil
+      CRails::AssetsCommands.execute(assets, task, rest)
     end
 
     # Set by the app's app/bots/** glue (`bin/app bot:poll telegram`);
