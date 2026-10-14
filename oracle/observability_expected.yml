@@ -1,0 +1,20 @@
+up_html_status	200
+up_html_body	<!DOCTYPE html><html><body style="background-color: green"></body></html>
+up_html_content_type	text/html; charset=utf-8
+up_html_vary	Accept
+up_json_status	200
+up_json_content_type	application/json; charset=utf-8
+up_json_body_status	up
+up_json_body_timestamp_iso8601	iso8601-parseable
+request_id_uuid_v4_format	uuid-v4
+request_id_changes_per_request	unique-per-request
+request_id_passthrough	test-id-123
+request_id_response_header_present	present
+not_found_status	404
+not_found_body_doctype	<!doctype html>
+not_found_content_type	text/html; charset=UTF-8
+not_found_request_id	UUID
+log_started_line	[UUID] Started GET "/up.json" for 127.0.0.1 at TS
+log_processing_line	[UUID] Processing by Rails::HealthController#show as JSON
+log_completed_line	[UUID] Completed 200 OK in NUMms (Views: NUMms | ActiveRecord: NUMms (NUM queries, NUM cached) | GC: NUMms)
+log_not_found_line	[UUID] Started GET "/nonexistent-observability" for 127.0.0.1 at TS

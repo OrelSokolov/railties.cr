@@ -1,0 +1,15 @@
+get_show	200|show ok
+get_with_params	200|a=1&b=2
+post_form_nested	200|title=T1
+session_counter_twice	200|count=1|count=2
+flash_across_redirect	302|/bounce|||200|/flash_show|Saved
+redirect_followed	302|/redirect_me|||200|/target|target reached
+redirect_chain	302|/redirect_twice|||302|/redirect_me|||200|/target|target reached
+cookie_roundtrip	200|token=abc
+signed_cookie_roundtrip	200|who=me
+json_post_echo	200|{"name":"crails"}
+not_found	404
+method_override_patch	200|PATCH done
+head_request	200|
+header_echo	200|abc
+delete_with_query	200|removed 7

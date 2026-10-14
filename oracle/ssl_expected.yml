@@ -1,0 +1,28 @@
+ssl_rd_get_status	301
+ssl_rd_get_location	"https://example.org/users/sign_in?foo=bar&baz=1"
+ssl_rd_get_content_type	"text/html; charset=utf-8"
+ssl_rd_get_body_empty	true
+ssl_rd_post_status	308
+ssl_rd_post_location	"https://example.org/users/sign_in"
+ssl_rd_delete_status	308
+ssl_rd_head_status	301
+ssl_rd_forwarded_status	200
+ssl_rd_forwarded_hsts	"max-age=63072000; includeSubDomains"
+ssl_rd_port_kept_location	"https://example.org:3000/users/sign_in"
+ssl_rd_no_query_location	"https://example.org/users/sign_in"
+ssl_rsd_delete_status	308
+ssl_rsd_get_status	301
+ssl_rs_get_status	302
+ssl_rs_post_status	302
+ssl_hsts_custom_header	"max-age=3600; preload"
+ssl_hsts_custom_http_hsts	nil
+ssl_hsts_false_header	"max-age=0; includeSubDomains"
+ssl_rhp_location	"https://secure.example.com:8080/users/sign_in?foo=bar"
+ssl_rex_status	200
+ssl_rex_hsts	nil
+ssl_rex_other_status	301
+ssl_rf_status	200
+ssl_rf_hsts	nil
+ssl_as_status	200
+ssl_as_hsts	"max-age=63072000; includeSubDomains"
+ssl_sc_https_flagged	["flagged"]
