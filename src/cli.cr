@@ -53,6 +53,7 @@ module CRails
       when "watch"     then Watch.run(argv[1..])
       when "supervise" then Build.ensure_app; Build.build; Supervisor.run(argv[1..])
       when "db", .starts_with?("db:") then DB.run(argv)
+      when "assets", .starts_with?("assets:") then Assets.run(argv)
       when "deploy"    then Deploy.run(argv[1..])
       when "generate", "g" then generate_cmd(argv[1..], :invoke)
       when "destroy", "d"  then generate_cmd(argv[1..], :revoke)
@@ -171,5 +172,6 @@ require "./watch"
 require "./supervisor"
 require "./console_cmd"
 require "./db_tasks"
+require "./assets_tasks"
 require "./deploy"
 require "./agent_tasks"

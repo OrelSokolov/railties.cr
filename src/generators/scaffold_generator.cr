@@ -60,6 +60,10 @@ module CRails
         AppGlue.patch_requires(self, "app/models")
         AppGlue.patch_requires(self, "app/controllers")
         AppGlue.patch_requires(self, "app/helpers")
+
+        # Rails: скаффолд кладёт app/assets/stylesheets/<plural>.css
+        create_file(File.join("app", "assets", "stylesheets", "#{controller_path}.css"),
+          "/* Styles for #{controller_class_name}Controller. */\n")
       end
 
       def parse_fields : Array(Field)

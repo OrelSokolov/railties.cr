@@ -2,6 +2,7 @@ require "log"
 require "http"
 require "action_pack_cr"
 require "importmap_cr"
+require "propshaft_cr"
 require "./observability"
 require "./credentials"
 require "./middleware"
@@ -9,6 +10,7 @@ require "./host_authorization"
 require "./ssl"
 require "./secure_headers"
 require "./static"
+require "./propshaft_helper"
 require "./nodelay_server"
 require "./vite_dev"
 require "./testing/integration"
@@ -225,6 +227,31 @@ module CRails
 
     # config.content_security_policy_report_only
     property? content_security_policy_report_only : Bool = false
+
+    # config.assets.* — Propshaft-модель (порты дефолтов Propshaft::Railtie:
+    # app/assets/* + vendor-каталоги; prefix /assets; version "1";
+    # компиляторы css/js url-rewrite + sourceMappingURL). Прекомпрессия
+    # versions = [".gz", ".br"] — CRails-расширение (static.cr отдаёт
+    # соседи по Accept-Encoding; гем ничего подобного не пишет).
+    property assets : Propshaft::Config = begin
+      assets = Propshaft::Config.new
+      assets.versions = [".gz", ".br"]
+      assets
+    end
+
+    # Дефолтные load path: подкаталоги app/assets/* (аналог
+    # paths["app/assets"].existent_directories в railtie гема) +
+    # vendor/assets/* + vendor/javascript (importmap-пины). Вызывается
+    # лениво из Application#assets — конфиги приложения успевают
+    # дописать config.assets.paths до первого обращения.
+    def default_asset_paths : Array(String)
+      paths = (Dir.glob(File.join(CRails.root, "app/assets/*")) +
+               Dir.glob(File.join(CRails.root, "vendor/assets/*")) +
+               [File.join(CRails.root, "vendor/javascript")])
+        .select { |d| Dir.exists?(d) }
+        .map { |d| d[(CRails.root.size + 1)..] }
+      paths.uniq
+    end
   end
 
   class Application
@@ -237,6 +264,18 @@ module CRails
       @routes = CRails::Routes::RouteSet.new
       @config = CRails::Config.new
     end
+
+    # Сборка ассетов (аналог Rails.application.assets): load path из
+    # config.assets.paths (дефолты — app/assets/* + vendor), резолвер —
+    # Static при существующем манифесте, иначе Dynamic (dev).
+    def assets : Propshaft::Assembly
+      @assets ||= begin
+        config.assets.paths = default_asset_paths if config.assets.paths.empty?
+        Propshaft::Assembly.new(config.assets)
+      end
+    end
+
+    @assets : Propshaft::Assembly?
 
     def initialize! : self
       @initialized = true

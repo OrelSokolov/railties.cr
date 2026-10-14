@@ -42,6 +42,10 @@ module CRails
           invoke("spec")
         end
 
+        # Rails: генератор контроллера кладёт app/assets/stylesheets/<name>.css
+        create_file(File.join("app", "assets", "stylesheets", "#{file_path}.css"),
+          "/* Styles for #{full_class_name}#controller. */\n")
+
         AppGlue.patch_requires(self, "app/controllers")
         AppGlue.patch_requires(self, "app/helpers")
       end

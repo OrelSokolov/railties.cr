@@ -27,6 +27,7 @@ module CRails
         dirs = [
           "src", "config/environments", "config/initializers", "app/controllers", "app/models",
           "app/views/layouts", "app/views/welcome", "app/javascript",
+          "app/assets/stylesheets", "app/assets/javascripts", "app/assets/images",
           "db", "public", "bin", "lib",
         ]
         dirs.each { |d| FileUtils.mkdir_p(File.join(dir, d)) }
@@ -35,8 +36,8 @@ module CRails
         # (dev mode): shards treats duplicate path deps across the graph
         # as ambiguous sources, so the app's shard.yml stays free of
         # framework dependencies.
-        {"active_support.cr", "action_view.cr", "action_pack.cr",
-         "active_record.cr", "railties.cr", "importmap.cr"}.each do |shard|
+        {"active_support.cr", "erb.cr", "action_view.cr", "action_pack.cr",
+         "active_record.cr", "railties.cr", "importmap.cr", "propshaft.cr"}.each do |shard|
           target = File.join(dir, "lib", shard.gsub('.', "_"))
           # The symlink lives inside lib/, one level deeper than the app root.
           link_target = File.join(rel, "..", shard)
@@ -70,6 +71,7 @@ module CRails
         write(dir, "app/views/layouts/application.html.erb", layout_erb)
         write(dir, "app/views/welcome/index.html.erb", index_erb)
         write(dir, "app/javascript/application.js", application_js)
+        write(dir, "app/assets/stylesheets/application.css", application_css)
         write(dir, "public/.gitkeep", "")
         write(dir, ".gitignore", gitignore)
         write(dir, "Procfile", procfile)
@@ -249,6 +251,10 @@ module CRails
       private def application_controller_cr : String
         <<-CODE
         abstract class ApplicationController < ActionController::Base
+          # Asset pipeline (propshaft): compute_asset_path во вьюхах
+          # резолвит логические пути через манифест/load path
+          # (/assets/<logical>-<digest>.<ext>).
+          include CRails::PropshaftHelper
           # CSRF-защита по умолчанию, как в Rails: POST/PUT/PATCH/DELETE
           # без валидного authenticity_token -> 422. Отключить точечно:
           #   skip_forgery_protection (или except: в protect_from_forgery)
@@ -296,6 +302,13 @@ module CRails
         CODE
       end
 
+      private def application_css : String
+        <<-CSS
+        /* Application stylesheet — compiled by `crails assets:precompile`
+         * (propshaft: digest-имена, url()-rewrite, /assets/<name>-<digest>.css). */
+        CSS
+      end
+
       private def layout_erb : String
         <<-'ERB'
         <!DOCTYPE html>
@@ -305,6 +318,7 @@ module CRails
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <title>CRails</title>
             <%= csrf_meta_tags %>
+            <%= stylesheet_link_tag "application" %>
             <%= javascript_importmap_tags %>
           </head>
           <body>

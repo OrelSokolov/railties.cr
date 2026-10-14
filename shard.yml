@@ -1,5 +1,5 @@
 name: railties_cr
-version: 0.1.1
+version: 0.1.2
 crystal: ">= 1.21.0"
 dependencies:
   active_support_cr:
@@ -13,6 +13,9 @@ dependencies:
     version: ~> 0.1.1
   importmap_cr:
     github: OrelSokolov/importmap.cr
+    version: ~> 0.1.0
+  propshaft_cr:
+    github: OrelSokolov/propshaft.cr
     version: ~> 0.1.0
   icr:
     github: OrelSokolov/icr.cr

@@ -5,9 +5,13 @@
 dependencies:
   active_support_cr:
     path: ../active_support.cr
+  erb_cr:
+    path: ../erb.cr
   action_view_cr:
     path: ../action_view.cr
   action_pack_cr:
     path: ../action_pack.cr
   importmap_cr:
     path: ../importmap.cr
+  propshaft_cr:
+    path: ../propshaft_cr

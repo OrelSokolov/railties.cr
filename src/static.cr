@@ -190,38 +190,43 @@ module CRails
       # --- CRails-расширение: propshaft-резолвинг /assets/* ---------------
 
       private struct PropshaftAsset
-        def initialize(@filepath : String, @content_type : String, @etag : String)
+        def initialize(@body : String, @content_type : String, @etag : String)
         end
 
-        getter filepath : String   # путь на диске
+        getter body : String          # скомпилированный контент (propshaft)
         getter content_type : String
-        getter etag : String       # SHA1-хэш контента (8 hex, как digest)
+        getter etag : String          # digest ассета (8 hex, как SHA1[0,8])
+      end
+
+      # Load path как в propshaft railtie: каждый подкаталог assets root
+      # добавляет свои файлы по пути относительно себя (первенство —
+      # алфавитный порядок каталогов). Компиляторы — дефолты гема, так
+      # что dev отдаёт compiled_content (url()-rewrite) байт-одинаково
+      # с precompiled-выходом (паритет dev/prod).
+      @propshaft_assembly : Propshaft::Assembly?
+
+      private def propshaft_assembly : Propshaft::Assembly
+        @propshaft_assembly ||= begin
+          dirs = Dir.glob(File.join(@assets_root, "*")).sort.select { |d| Dir.exists?(d) }
+          config = Propshaft::Config.new
+          config.paths = dirs
+          config.version = "1"
+          Propshaft::Assembly.new(config)
+        end
       end
 
       # Propshaft::Asset.extract_path_and_digest: digest — это
       # -[0-9a-zA-Z]{7,128} перед финальным расширением; из logical path
-      # он вырезается. Ищем logical path в подкаталогах assets root
-      # (app/assets/stylesheets/landing.css → "landing.css"), как
-      # load path в propshaft railtie.
+      # он вырезается, затем логический путь ищется в load path.
+      # (CRails-отклонение от Propshaft::Server: устаревший digest в URL
+      # не даёт 404 — отдаётся свежий файл.)
       private def resolve_propshaft_asset(path : String) : PropshaftAsset?
-        # Propshaft::Asset.extract_path_and_digest: вырезаем последнюю
-        # -digest-часть (-[0-9a-zA-Z]{7,128}) перед финальным расширением.
         logical = path.lchop("/assets/").sub(/\A(.*)-([0-9a-zA-Z]{7,128})(\.[^.]+)\z/) { "#{$1}#{$3}" }
-
-        # Load path как в propshaft railtie: каждый подкаталог assets
-        # root добавляет свои файлы по пути относительно себя.
-        Dir.glob(File.join(@assets_root, "*")).sort.each do |dir|
-          next unless File.directory?(dir)
-          candidate = File.join(dir, logical)
-          next unless info = File.info?(candidate)
-          next unless info.file?
-          ext = File.extname(candidate)
-          content_type = MIME[ext]? || "text/plain"
-          etag = read_cached(candidate).try(&.etag) ||
-                 Digest::SHA1.hexdigest(File.read(candidate))[0, 8]
-          return PropshaftAsset.new(candidate, content_type, etag)
-        end
-        nil
+        asset = propshaft_assembly.load_path.find(logical)
+        return nil unless asset
+        ext = File.extname(logical)
+        PropshaftAsset.new(asset.compiled_content,
+          MIME[ext]? || "text/plain", asset.digest)
       end
 
       # Propshaft::Server: Cache-Control immutable + ETag; charset=utf-8
@@ -240,10 +245,9 @@ module CRails
         response.headers["Vary"] = "Accept-Encoding"
         @headers.each { |k, v| response.headers[k] = v }
 
-        body = read_cached(asset.filepath).try(&.body) || File.read(asset.filepath)
-        response.headers["Content-Length"] = body.bytesize.to_s
+        response.headers["Content-Length"] = asset.body.bytesize.to_s
         return if context.request.method == "HEAD"
-        response.print body
+        response.print asset.body
       end
 
       private def not_found_asset(context) : Nil
