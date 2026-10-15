@@ -92,9 +92,30 @@ module CRails
 
   def self.logger : Log
     # The default root binding (stderr, info) is used; no extra binding
-    # or messages get logged twice.
-    @@logger ||= Log.for("crails")
+    # or messages get logged twice. RAILS_LOG_LEVEL (the env the harness
+    # and production tooling set) lowers the severity — otherwise every
+    # request pays for a JSON log line even at warn+.
+    @@logger ||= begin
+      log = Log.for("crails")
+      if (severity = env_log_severity)
+        log.level = severity
+      end
+      log
+    end
   end
+
+  # RAILS_LOG_LEVEL / CRAILS_LOG_LEVEL → severity; nil — нет env или
+  # неизвестное значение (остаётся дефолт info).
+  def self.env_log_severity : Log::Severity?
+    (level = ENV["CRAILS_LOG_LEVEL"]? || ENV["RAILS_LOG_LEVEL"]?) &&
+      LOG_LEVELS[level.downcase]?
+  end
+
+  LOG_LEVELS = {
+    "debug" => Log::Severity::Debug, "info" => Log::Severity::Info,
+    "warn" => Log::Severity::Warn, "error" => Log::Severity::Error,
+    "fatal" => Log::Severity::Fatal, "none" => Log::Severity::None,
+  }
 
   @@dev_endpoints : Hash(String, Proc(HTTP::Server::Context, Bool))?
 
