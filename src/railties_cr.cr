@@ -260,6 +260,8 @@ module CRails
     getter config : CRails::Config
     getter? initialized = false
     @middleware_chain : HTTP::Handler?
+    @key_generators = {} of String => ActiveSupport::CachingKeyGenerator
+    @message_verifiers = {} of Tuple(String, String, Symbol, Bool) => ActiveSupport::MessageVerifier
 
     def initialize
       @routes = CRails::Routes::RouteSet.new
@@ -289,6 +291,30 @@ module CRails
     # config/credentials.yml.enc + config/master.key (см. credentials.cr)
     def credentials : CRails::EncryptedConfiguration
       @credentials ||= CRails.credentials
+    end
+
+    # Rails.application.key_generator (railties 8.1.4, application.rb):
+    # CachingKeyGenerator поверх KeyGenerator(secret_key_base, 1000
+    # итераций), мемоизирован по значению секрета — PBKDF2-вывод ключа
+    # выполняется один раз на процесс, а не на каждый вызов. Ротация
+    # secret_key_base даёт новый кэш-энтри и новый ключ.
+    def key_generator : ActiveSupport::CachingKeyGenerator
+      secret = CRails.secret_key_base || raise RuntimeError.new(
+        "secret_key_base is not configured — set SECRET_KEY_BASE or config/credentials")
+      @key_generators[secret] ||= ActiveSupport::CachingKeyGenerator.new(
+        ActiveSupport::KeyGenerator.new(secret, iterations: 1000, digest: :sha256))
+    end
+
+    # Rails.application.message_verifier (8.1: ActiveSupport::MessageVerifiers):
+    # верификатор с ключом key_generator.generate_key(salt), мемоизирован
+    # по (secret, salt, digest, url_safe) — подпись/проверка на запрос,
+    # дорогой KDF один раз на процесс.
+    def message_verifier(salt : String, *, digest : Symbol = :sha256,
+                         url_safe : Bool = false) : ActiveSupport::MessageVerifier
+      secret = CRails.secret_key_base.to_s
+      cache_key = {secret, salt, digest, url_safe}
+      @message_verifiers[cache_key] ||= ActiveSupport::MessageVerifier.new(
+        key_generator.generate_key(salt), url_safe: url_safe, digest: digest)
     end
 
     # HTTP entry point: the middleware stack (config.middleware) with
