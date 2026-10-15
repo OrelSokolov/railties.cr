@@ -131,6 +131,48 @@ class CsJsController < ActionController::Base
   end
 end
 
+# --- Rails 8.2 verification strategies (Sec-Fetch-Site) -------------------
+# Оракул — исходник rails/rails@main request_forgery_protection.rb
+# (8.2.0.alpha, `using:`/forgery_protection_verification_strategy):
+# ожидания ниже — выписанная из него таблица истинности; снятие ruby-оракула
+# невозможно: 8.1.4 стратегий не содержит.
+
+class CsHeaderOnlyController < ActionController::Base
+  protect_from_forgery using: :header_only, with: :exception
+
+  def create
+    render plain: "created"
+  end
+
+  def show
+    render plain: "shown"
+  end
+end
+
+class CsHybridController < ActionController::Base
+  protect_from_forgery using: :header_or_legacy_token, with: :exception
+
+  def token
+    render plain: form_authenticity_token
+  end
+
+  def create
+    render plain: "created"
+  end
+end
+
+class CsUnlessController < ActionController::Base
+  protect_from_forgery using: :header_only, with: :exception, unless: :bot_key?
+
+  def create
+    render plain: "created"
+  end
+
+  def bot_key?
+    params["bot_key"]? != nil
+  end
+end
+
 # --- app + server --------------------------------------------------------
 
 APP_CSRF = CRails::Application.new.tap do |app|
@@ -156,6 +198,11 @@ APP_CSRF = CRails::Application.new.tap do |app|
     post "/origin_create", to: "cs_origin#create"
     post "/allow_create", to: "cs_allow_off#create"
     get "/script", to: "cs_js#script"
+    post "/ho_create", to: "cs_header_only#create"
+    get "/ho_show", to: "cs_header_only#show"
+    get "/hy_token", to: "cs_hybrid#token"
+    post "/hy_create", to: "cs_hybrid#create"
+    post "/un_create", to: "cs_unless#create"
   end
 end
 
@@ -443,6 +490,117 @@ describe "CSRF protection (actionpack 8.1.4 oracle)" do
     ctrl.__set_params({} of String => String)
     expect_raises(ActionController::InvalidCrossOriginRequest) { ctrl.__run_action("script") }
     ("raise:" + "ActionController::InvalidCrossOriginRequest").should eq CSRF_EXPECTED["js_cross_origin_raise_class"]
+  end
+end
+
+describe "CSRF verification strategies (rails 8.2 header_only)" do
+  it "ho_post_same_origin_ok" do
+    csrf_req("POST", "/ho_create", CsrfJar.new,
+      headers: {"Sec-Fetch-Site" => "same-origin"}).status_code.should eq 200
+  end
+
+  it "ho_post_same_site_ok" do
+    csrf_req("POST", "/ho_create", CsrfJar.new,
+      headers: {"Sec-Fetch-Site" => "same-site"}).status_code.should eq 200
+  end
+
+  it "ho_post_capitalized_header_ok" do
+    # sec_fetch_site_value нормализуется downcase+presence
+    csrf_req("POST", "/ho_create", CsrfJar.new,
+      headers: {"Sec-Fetch-Site" => "Same-Origin"}).status_code.should eq 200
+  end
+
+  it "ho_post_cross_site_422" do
+    csrf_req("POST", "/ho_create", CsrfJar.new,
+      headers: {"Sec-Fetch-Site" => "cross-site"}).status_code.should eq 422
+  end
+
+  it "ho_post_cross_site_trusted_origin_ok" do
+    old = ActionController::RequestForgeryProtection.forgery_protection_trusted_origins
+    ActionController::RequestForgeryProtection.forgery_protection_trusted_origins = ["https://accounts.google.com"]
+    status = csrf_req("POST", "/ho_create", CsrfJar.new,
+      headers: {"Sec-Fetch-Site" => "cross-site", "Origin" => "https://accounts.google.com"}).status_code
+    ActionController::RequestForgeryProtection.forgery_protection_trusted_origins = old
+    status.should eq 200
+  end
+
+  it "ho_post_no_header_plain_http_ok" do
+    # header отсутствует -> разрешено только по plain HTTP (тест-сервер http)
+    csrf_req("POST", "/ho_create", CsrfJar.new).status_code.should eq 200
+  end
+
+  it "ho_post_no_header_https_422" do
+    csrf_req("POST", "/ho_create", CsrfJar.new,
+      headers: {"X-Forwarded-Proto" => "https"}).status_code.should eq 422
+  end
+
+  it "ho_post_none_422" do
+    csrf_req("POST", "/ho_create", CsrfJar.new,
+      headers: {"Sec-Fetch-Site" => "none"}).status_code.should eq 422
+  end
+
+  it "ho_post_valid_token_still_422" do
+    # header_only не принимает authenticity_token вовсе
+    jar = CsrfJar.new
+    ctrl = CsHeaderOnlyController.new(HTTP::Server::Context.new(
+      HTTP::Request.new("GET", "/ho_show"), HTTP::Server::Response.new(IO::Memory.new)))
+    token = ctrl.form_authenticity_token
+    csrf_req("POST", "/ho_create", jar,
+      params: {"authenticity_token" => token},
+      headers: {"Sec-Fetch-Site" => "none"}).status_code.should eq 422
+  end
+
+  it "ho_get_cross_site_ok" do
+    # GET exempt от verification
+    csrf_req("GET", "/ho_show", CsrfJar.new,
+      headers: {"Sec-Fetch-Site" => "cross-site"}).status_code.should eq 200
+  end
+
+  it "ho_get_vary_header" do
+    # append_sec_fetch_site_to_vary_header: послеэкшен protect_from_forgery
+    response = csrf_req("GET", "/ho_show", CsrfJar.new)
+    response.headers["Vary"]?.to_s.split(",").map(&.strip).should contain("Sec-Fetch-Site")
+  end
+
+  it "ho_raise_class" do
+    io = IO::Memory.new
+    req = HTTP::Request.new("POST", "/ho_create")
+    req.headers["Sec-Fetch-Site"] = "none"
+    ctx = HTTP::Server::Context.new(req, HTTP::Server::Response.new(io))
+    ctrl = CsHeaderOnlyController.new(ctx)
+    ctrl.__set_params({} of String => String)
+    expect_raises(ActionController::InvalidCrossOriginRequest) { ctrl.__run_action("create") }
+  end
+
+  it "hy_fallback_token_ok" do
+    # header_or_legacy_token: "none"/нет хедера -> проверка токена
+    jar = CsrfJar.new
+    token = csrf_body(csrf_req("GET", "/hy_token", jar))
+    csrf_req("POST", "/hy_create", jar,
+      params: {"authenticity_token" => token}).status_code.should eq 200
+  end
+
+  it "hy_same_site_no_token_ok" do
+    csrf_req("POST", "/hy_create", CsrfJar.new,
+      headers: {"Sec-Fetch-Site" => "same-site"}).status_code.should eq 200
+  end
+
+  it "hy_cross_site_valid_token_422" do
+    jar = CsrfJar.new
+    token = csrf_body(csrf_req("GET", "/hy_token", jar))
+    csrf_req("POST", "/hy_create", jar,
+      params: {"authenticity_token" => token},
+      headers: {"Sec-Fetch-Site" => "cross-site"}).status_code.should eq 422
+  end
+
+  it "hy_no_header_no_token_422" do
+    csrf_req("POST", "/hy_create", CsrfJar.new).status_code.should eq 422
+  end
+
+  it "unless_skips_protection" do
+    # Campfire-паттерн: unless: -> bot-ключ отключает защиту на экшене
+    csrf_req("POST", "/un_create", CsrfJar.new,
+      params: {"bot_key" => "1-abc"}).status_code.should eq 200
   end
 end
 
