@@ -124,6 +124,7 @@ module CRails
         watch          Rebuild + restart on source changes (dev loop)
         supervise      Run all Procfile roles under a supervisor
                        (web/worker/scheduler; restarts on crash, Ctrl-C stops all)
+        db:create      Create the database (sqlite file / CREATE DATABASE)
         db:migrate     Run pending migrations (db/migrate/*.cr)
         db:rollback    Roll back the last migration (STEP=n)
         db:schema:dump Refresh db/schema.cr + db/schema.yml
