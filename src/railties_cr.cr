@@ -263,11 +263,14 @@ module CRails
 
     # Дефолтные load path: подкаталоги app/assets/* (аналог
     # paths["app/assets"].existent_directories в railtie гема) +
-    # vendor/assets/* + vendor/javascript (importmap-пины). Вызывается
-    # лениво из Application#assets — конфиги приложения успевают
-    # дописать config.assets.paths до первого обращения.
+    # vendor/assets/* + vendor/javascript (importmap-пины) +
+    # app/javascript (importmap-rails добавляет его в load path —
+    # контроллеры/либы из app/javascript раздаются как ассеты).
+    # Вызывается лениво из Application#assets — конфиги приложения
+    # успевают дописать config.assets.paths до первого обращения.
     def default_asset_paths : Array(String)
       paths = (Dir.glob(File.join(CRails.root, "app/assets/*")) +
+               Dir.glob(File.join(CRails.root, "app/javascript")) +
                Dir.glob(File.join(CRails.root, "vendor/assets/*")) +
                [File.join(CRails.root, "vendor/javascript")])
         .select { |d| Dir.exists?(d) }
