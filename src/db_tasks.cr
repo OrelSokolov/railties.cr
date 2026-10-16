@@ -90,8 +90,14 @@ module CRails
           ActiveRecord::Migrator.new(direction, migrations.map(&.[1]), step).migrate
         CODE
         dump_block = dump ? <<-CODE : ""
-          n = ActiveRecord::SchemaDumper.dump_cr_to_file("db/schema.cr")
-          puts "dumped \#{n} tables -> db/schema.cr"
+          if ActiveRecord::Base.sqlite?
+            # schema.cr (Rails schema.rb syntax) is the migration round-trip
+            # format and PostgreSQL-only; SQLite dumps just the codegen input.
+            puts "sqlite: skipping db/schema.cr (not a migration source); dumping db/schema.yml"
+          else
+            n = ActiveRecord::SchemaDumper.dump_cr_to_file("db/schema.cr")
+            puts "dumped \#{n} tables -> db/schema.cr"
+          end
           ActiveRecord::SchemaDumper.dump_to_file("db/schema.yml")
           puts "dumped db/schema.yml (model codegen input)"
         CODE
