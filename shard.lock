@@ -1,41 +1,40 @@
-# NOTICE: This lockfile contains some overrides from shard.override.yml
 version: 2.0
 shards:
-  action_pack_cr: # Overridden
-    path: ../action_pack.cr
+  action_pack_cr:
+    git: https://github.com/orelsokolov/action_pack.cr.git
+    version: 0.2.0
+
+  action_view_cr:
+    git: https://github.com/orelsokolov/action_view.cr.git
     version: 0.1.1
 
-  action_view_cr: # Overridden
-    path: ../action_view.cr
-    version: 0.1.0
-
-  active_support_cr: # Overridden
-    path: ../active_support.cr
-    version: 0.1.0
+  active_support_cr:
+    git: https://github.com/orelsokolov/active_support.cr.git
+    version: 0.1.3
 
   db:
     git: https://github.com/crystal-lang/crystal-db.git
     version: 0.15.0
 
-  erb_cr: # Overridden
-    path: ../erb.cr
+  erb_cr:
+    git: https://github.com/orelsokolov/erb.cr.git
     version: 0.1.0
 
   icr:
     git: https://github.com/orelsokolov/icr.cr.git
     version: 1.3.0
 
-  importmap_cr: # Overridden
-    path: ../importmap.cr
+  importmap_cr:
+    git: https://github.com/orelsokolov/importmap.cr.git
     version: 0.1.0
 
   pg:
     git: https://github.com/will/crystal-pg.git
     version: 0.31.0
 
-  propshaft_cr: # Overridden
-    path: ../propshaft_cr
-    version: 0.1.0
+  propshaft_cr:
+    git: https://github.com/orelsokolov/propshaft.cr.git
+    version: 0.1.1
 
   redis:
     git: https://github.com/jgaskins/redis.git

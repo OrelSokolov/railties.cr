@@ -229,18 +229,53 @@ module CRails
 
     # ActionDispatch::ShowExceptions + DebugExceptions port: the rescue
     # ladder — RoutingError -> 404 HTML page, TooManyRequests -> 429,
-    # anything else -> 500 (backtrace in development).
+    # anything else -> 500 (backtrace in development). HTML error pages
+    # come from public/#{status}.html under CRails.root — the
+    # ActionDispatch::PublicExceptionsController behavior; when the app
+    # ships no such file, a built-in minimal page is served instead.
     class ShowExceptions
       include HTTP::Handler
 
-      NOT_FOUND_PAGE = "<!doctype html><html><body><h1>404 Not Found</h1></body></html>"
+      NOT_FOUND_PAGE   = "<!doctype html><html><body><h1>404 Not Found</h1></body></html>"
+      UNPROCESSABLE_PAGE = "<!doctype html><html><body><h1>422 Unprocessable Content</h1></body></html>"
+      INTERNAL_ERROR_PAGE = "<!doctype html><html><body><h1>500 Internal Server Error</h1></body></html>"
+
+      # public/#{status}.html bodies, mtime-cached so edits to the pages
+      # show up without a restart (Rails re-reads the file per error
+      # request; errors are rare, the cache just avoids re-reading the
+      # same bytes on a scanner hitting 404s).
+      @@error_pages = {} of Int32 => Tuple(Time, String)
+
+      # PublicExceptionsController#render_error_page: the file is
+      # resolved against the app root, nil when absent/unreadable.
+      def self.error_page(status : Int32) : String?
+        path = File.join(CRails.root, "public", "#{status}.html")
+        if (info = File.info?(path))
+          mtime = info.modification_time
+          if (cached = @@error_pages[status]?) && cached[0] == mtime
+            return cached[1]
+          end
+          body = File.read(path)
+          @@error_pages[status] = {mtime, body}
+          body
+        end
+      rescue
+        nil
+      end
+
+      # Serves the app's public/#{status}.html when present, else the
+      # built-in *fallback* page (PublicExceptionsController falls back
+      # to a bare "Internal Server Error" the same way).
+      private def render_error_page(context : HTTP::Server::Context, status : Int32, fallback : String) : Nil
+        context.response.status_code = status
+        context.response.headers["Content-Type"] = "text/html; charset=UTF-8"
+        context.response.print self.class.error_page(status) || fallback
+      end
 
       def call(context : HTTP::Server::Context) : Nil
         call_next(context)
       rescue ex : ActionController::RoutingError
-        context.response.status_code = 404
-        context.response.headers["Content-Type"] = "text/html; charset=UTF-8"
-        context.response.print NOT_FOUND_PAGE
+        render_error_page(context, 404, NOT_FOUND_PAGE)
       rescue ex : ActionController::TooManyRequests
         CRails.logger.warn { "#{context.request.method} #{context.request.path} rate limited (429)" }
         context.response.status_code = 429
@@ -248,20 +283,17 @@ module CRails
       rescue ex : ActionController::MissingFile
         # ActionController::MissingFile -> 404, как rescue_responses Rails
         CRails.logger.info { "#{context.request.method} #{context.request.path} missing file (404)" }
-        context.response.status_code = 404
-        context.response.headers["Content-Type"] = "text/html; charset=UTF-8"
-        context.response.print NOT_FOUND_PAGE
+        render_error_page(context, 404, NOT_FOUND_PAGE)
       rescue ex : ActionController::InvalidAuthenticityToken
         # CSRF: ActionController::InvalidAuthenticityToken -> 422, как
-        # ShowExceptions в Rails (protect_from_forgery with: :exception).
+        # ShowExceptions в Rails (protect_from_forgery with: :exception);
+        # страница — public/422.html, как PublicExceptionsController.
         CRails.logger.warn { "#{context.request.method} #{context.request.path} can't verify CSRF token authenticity (422)" }
-        context.response.status_code = 422
-        context.response.headers["Content-Type"] = "text/html; charset=utf-8"
+        render_error_page(context, 422, UNPROCESSABLE_PAGE)
       rescue ex : ActionController::InvalidCrossOriginRequest
         # Кросс-доменный <script src=...> на защищённый JS-ответ -> 422.
         CRails.logger.warn { "#{context.request.method} #{context.request.path} cross-origin JavaScript blocked (422)" }
-        context.response.status_code = 422
-        context.response.headers["Content-Type"] = "text/html; charset=utf-8"
+        render_error_page(context, 422, UNPROCESSABLE_PAGE)
       rescue ex : ActionController::TypedParams::Invalid
         # TypedParams::Invalid -> 422 с телом ошибок в JSON (Iteration 10;
         # отклонение от Rails: ActionController::ParameterMissing -> 400
@@ -277,17 +309,21 @@ module CRails
         # active_record_cr, so the constant may not exist here.
         if ex.class.name == "ActiveRecord::RecordNotFound"
           CRails.logger.info { "#{context.request.method} #{context.request.path} not found (404)" }
-          context.response.status_code = 404
-          context.response.headers["Content-Type"] = "text/html; charset=UTF-8"
-          context.response.print NOT_FOUND_PAGE
+          render_error_page(context, 404, NOT_FOUND_PAGE)
           return
         end
         CRails.logger.error(exception: ex) { "#{context.request.method} #{context.request.path} failed" }
-        context.response.status_code = 500
-        context.response.headers["Content-Type"] = "text/plain; charset=utf-8"
-        body = "500 Internal Server Error"
-        body += "\n#{ex}\n#{ex.backtrace?.try(&.join('\n'))}" if CRails.env.development?
-        context.response.print body
+        if CRails.env.development?
+          # DebugExceptions counterpart: в development — бэктрейс plain
+          # text вместо public/500.html.
+          context.response.status_code = 500
+          context.response.headers["Content-Type"] = "text/plain; charset=utf-8"
+          body = "500 Internal Server Error"
+          body += "\n#{ex}\n#{ex.backtrace?.try(&.join('\n'))}"
+          context.response.print body
+        else
+          render_error_page(context, 500, INTERNAL_ERROR_PAGE)
+        end
       end
     end
 
