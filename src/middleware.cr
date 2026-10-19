@@ -35,8 +35,8 @@ module CRails
     # call time, the way Rails' own configurable ones (CSP, Static) read
     # `request.env` / config anyway.
     class Middleware
-      getter name : String
-      getter builder : -> HTTP::Handler
+      attr_reader name : String
+      attr_reader builder : -> HTTP::Handler
 
       def initialize(klass)
         @name = klass.name.to_s
@@ -66,7 +66,7 @@ module CRails
 
     include Enumerable(Middleware)
 
-    getter middlewares : Array(Middleware)
+    attr_reader middlewares : Array(Middleware)
 
     def initialize
       @middlewares = [] of Middleware
@@ -178,7 +178,7 @@ module CRails
     # Rack `app` constructor argument. Keeps multiple app instances
     # (specs, tests) independent of the CRails.application global.
     module Configurable
-      property application : CRails::Application?
+      attr_accessor application : CRails::Application?
     end
 
     # ActionDispatch::RequestId port: passes the incoming X-Request-Id

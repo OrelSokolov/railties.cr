@@ -5,11 +5,11 @@
 module CRails
   module Generators
     class Field
-      getter name : String
-      getter type : String
-      getter limit : Int32?
-      getter precision : Int32?
-      getter scale : Int32?
+      attr_reader name : String
+      attr_reader type : String
+      attr_reader limit : Int32?
+      attr_reader precision : Int32?
+      attr_reader scale : Int32?
       getter? index : Bool
       getter? uniq : Bool
       getter? polymorphic : Bool
@@ -48,7 +48,7 @@ module CRails
                        time date boolean references belongs_to]
 
       class UnknownFieldType < Exception
-        getter field : String
+        attr_reader field : String
 
         def initialize(@field)
           super("unknown type")

@@ -42,8 +42,8 @@ module CRails
       DEV_PATH_PREFIXES = {"/@vite", "/@id", "/@fs", "/@react-refresh",
                             "/src", "/node_modules", "/vite/"}
 
-      property host : String
-      property port : Int32
+      attr_accessor host : String
+      attr_accessor port : Int32
       # nil — авто-включение по env (dev-режим / CRAILS_VITE_DEV=1);
       # true/false — явное управление (тесты).
       @enabled : Bool? = nil

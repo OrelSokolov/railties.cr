@@ -81,10 +81,10 @@ module CRails
         def initialize(@mtime : Time, @size : Int64, @body : String, @etag : String)
         end
 
-        getter mtime : Time
-        getter size : Int64
-        getter body : String
-        getter etag : String
+        attr_reader mtime : Time
+        attr_reader size : Int64
+        attr_reader body : String
+        attr_reader etag : String
       end
 
       # Возвращает закэшированное тело файла или читает+кэширует.
@@ -193,9 +193,9 @@ module CRails
         def initialize(@body : String, @content_type : String, @etag : String)
         end
 
-        getter body : String          # скомпилированный контент (propshaft)
-        getter content_type : String
-        getter etag : String          # digest ассета (8 hex, как SHA1[0,8])
+        attr_reader body : String          # скомпилированный контент (propshaft)
+        attr_reader content_type : String
+        attr_reader etag : String          # digest ассета (8 hex, как SHA1[0,8])
       end
 
       # Load path как в propshaft railtie: каждый подкаталог assets root

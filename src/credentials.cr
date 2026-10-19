@@ -113,9 +113,9 @@ module CRails
 
     DEFAULT_ENV_KEY = "RAILS_MASTER_KEY"
 
-    getter content_path : String
-    getter key_path : String
-    getter env_key : String
+    attr_reader content_path : String
+    attr_reader key_path : String
+    attr_reader env_key : String
 
     def initialize(@content_path : String, @key_path : String,
                    @env_key : String = DEFAULT_ENV_KEY,

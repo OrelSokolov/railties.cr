@@ -36,25 +36,25 @@ module CRails
   #   config.ssl_options.hsts.preload = true
   class SSLOptions
     class Redirect
-      property host : String?
-      property port : Int32?
-      property status : Int32?
-      property body : String?
+      attr_accessor host : String?
+      attr_accessor port : Int32?
+      attr_accessor status : Int32?
+      attr_accessor body : String?
       # redirect: false — no redirecting and no cookie flagging (the
       # gem's exclude falls back to `!@redirect`).
       property? enabled : Bool = true
-      property exclude : (HTTP::Server::Context -> Bool)?
+      attr_accessor exclude : (HTTP::Server::Context -> Bool)?
     end
 
     class HSTS
       # 2 years, as recommended on hstspreload.org (the gem default).
-      property expires : Int64 = 63072000_i64
+      attr_accessor expires : Int64 = 63072000_i64
       property? subdomains : Bool = true
       property? preload : Bool = false
     end
 
-    getter redirect : Redirect = Redirect.new
-    getter hsts : HSTS = HSTS.new
+    attr_reader redirect : Redirect = Redirect.new
+    attr_reader hsts : HSTS = HSTS.new
     property? secure_cookies : Bool = true
 
     # config.ssl_options = { redirect: false } analog (DSL shortcut).

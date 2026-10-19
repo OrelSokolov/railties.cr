@@ -80,7 +80,7 @@ module CRails
       "worker_src"                => "worker-src",
     }
 
-    getter directives : Array({String, Array(String)})
+    attr_reader directives : Array({String, Array(String)})
 
     def initialize
       # insertion order, как Ruby Hash в геме (build склеивает в порядке

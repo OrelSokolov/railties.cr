@@ -31,9 +31,9 @@ module ActionDispatch
   # serialized HTTP::Server::Response (headers + body), so multi-value
   # Set-Cookie survives intact.
   class TestResponse
-    getter status_code : Int32
-    getter headers : HTTP::Headers
-    getter body : String
+    attr_reader status_code : Int32
+    attr_reader headers : HTTP::Headers
+    attr_reader body : String
 
     def initialize(@status_code : Int32, @headers : HTTP::Headers, @body : String)
     end
@@ -81,21 +81,21 @@ module ActionDispatch
     # post[title]=T1 like Rails/Rack's nested param encoding.
     alias ParamValue = String | Hash(String, ParamValue)
 
-    getter response : TestResponse?
+    attr_reader response : TestResponse?
     # Path (with query string) of the last performed request — after
     # redirect following this is the *final* destination, like Rails'
     # IntegrationTest `request.path`.
-    getter path : String?
+    attr_reader path : String?
     # Default "example.test": dev-mode HostAuthorization allows one
     # subdomain label under .test/.localhost (Rails' www.example.com
     # needs the empty test-env hosts list; same semantics, host never
     # reaches transcripts).
-    property host : String = "example.test"
+    attr_accessor host : String = "example.test"
     # Rails' Integration::Session does not follow redirects by default
     # (IntegrationTest asserts on the 302; follow_redirect! follows
     # manually). Capybara-style drivers flip this to true.
     property? follow_redirects : Bool = false
-    property redirect_limit : Int32 = 10
+    attr_accessor redirect_limit : Int32 = 10
 
     @cookies = {} of String => String
     @redirect_count : Int32 = 0

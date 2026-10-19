@@ -31,8 +31,8 @@ module CRails
     # IPAddr("a.b.c.d/p") port (v4 + v6, "::" compression supported;
     # no embedded-IPv4 forms like "::ffff:1.2.3.4").
     class IPCidr
-      getter masked : UInt128
-      getter prefix : Int32
+      attr_reader masked : UInt128
+      attr_reader prefix : Int32
       getter? ipv6 : Bool
 
       def initialize(cidr : String)

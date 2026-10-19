@@ -12,12 +12,12 @@ module CRails
 
     class Base
       # :invoke (generate) or :revoke (destroy).
-      property behavior : Symbol = :invoke
+      attr_accessor behavior : Symbol = :invoke
       property? force : Bool = false
       property? skip : Bool = false
       property? pretend : Bool = false
       property? quiet : Bool = false
-      property skip_collision_check : Bool = false
+      attr_accessor skip_collision_check : Bool = false
 
       @depth = 0
 
@@ -64,10 +64,10 @@ module CRails
         {opts, args}
       end
 
-      property options : Hash(String, Bool) = Hash(String, Bool).new
-      property args : Array(String) = [] of String
+      attr_accessor options : Hash(String, Bool) = Hash(String, Bool).new
+      attr_accessor args : Array(String) = [] of String
       # Status output (injectable for specs).
-      property output : IO = STDOUT
+      attr_accessor output : IO = STDOUT
 
       def option?(name : String, default = true) : Bool
         return options[name] if options.has_key?(name)

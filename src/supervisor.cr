@@ -22,12 +22,12 @@ module CRails
       MAX_BACKOFF       = 5.seconds
 
       class Role
-        getter name : String
-        getter command : String
-        property process : Process?
+        attr_reader name : String
+        attr_reader command : String
+        attr_accessor process : Process?
         property? disabled : Bool = false
-        property backoff : Time::Span = 1.second
-        property next_restart : Time::Instant?
+        attr_accessor backoff : Time::Span = 1.second
+        attr_accessor next_restart : Time::Instant?
 
         def initialize(@name, @command)
         end

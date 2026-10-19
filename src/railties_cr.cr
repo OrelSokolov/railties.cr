@@ -1,3 +1,4 @@
+require "attr_reader_cr"
 require "log"
 require "http"
 require "action_pack_cr"
@@ -139,8 +140,8 @@ module CRails
   end
 
   class Config
-    property host : String = "localhost"
-    property port : Int32 = 3000
+    attr_accessor host : String = "localhost"
+    attr_accessor port : Int32 = 3000
     # JSON request logs: CRails extension (Rails 8 ships no JSON log
     # formatter); on by default in production like Rails' JSON-ish prod
     # logging posture, text lines elsewhere. CRAILS_LOG_JSON=1 forces
@@ -180,7 +181,7 @@ module CRails
       @middleware.use CRails::Middleware::Head
     end
 
-    property log_json : Bool
+    attr_accessor log_json : Bool
     property? metrics : Bool = true
 
     # config.hosts — ActionDispatch::HostAuthorization записи: строка
@@ -188,7 +189,7 @@ module CRails
     # IPCidr ("192.168.0.0/16"). В development — дефолт Rails 8.1:
     # .localhost/.test + любые IP; CRAILS_DEVELOPMENT_HOSTS (или
     # RAILS_DEVELOPMENT_HOSTS, запятая) добавляет свои.
-    property hosts : Array(Middleware::HostEntry) = begin
+    attr_accessor hosts : Array(Middleware::HostEntry) = begin
       if CRails.env.development?
         dev = [".localhost", ".test"] of Middleware::HostEntry +
           [Middleware::IPCidr.new("0.0.0.0/0"), Middleware::IPCidr.new("::/0")]
@@ -202,26 +203,26 @@ module CRails
 
     # config.host_authorization = { exclude: / response_app: } —
     # типизированные свойства (отклонение: нет Hash-опций).
-    property host_authorization_exclude : (HTTP::Server::Context -> Bool)?
-    property host_authorization_response_app : Proc(HTTP::Server::Context, Nil)?
+    attr_accessor host_authorization_exclude : (HTTP::Server::Context -> Bool)?
+    attr_accessor host_authorization_response_app : Proc(HTTP::Server::Context, Nil)?
 
     # config.force_ssl / assume_ssl / ssl_options — ActionDispatch::SSL
     # и AssumeSSL (см. src/ssl.cr). ssl_default_redirect_status: 308 —
     # дефолт Rails 8.1 (config.action_dispatch.ssl_default_redirect_status).
-    property force_ssl : Bool = false
-    property assume_ssl : Bool = false
-    property ssl_options : CRails::SSLOptions = CRails::SSLOptions.new
-    property ssl_default_redirect_status : Int32 = 308
+    attr_accessor force_ssl : Bool = false
+    attr_accessor assume_ssl : Bool = false
+    attr_accessor ssl_options : CRails::SSLOptions = CRails::SSLOptions.new
+    attr_accessor ssl_default_redirect_status : Int32 = 308
 
     # config.action_mailer.show_previews: /rails/mailers (and any other
     # registered CRails.dev_endpoints) is served in development only,
     # like Rails 8.1's default.
     property? show_previews : Bool = CRails.env.development?
-    getter middleware : CRails::MiddlewareStack
+    attr_reader middleware : CRails::MiddlewareStack
 
     # config.action_dispatch.default_headers (Rails 8.1 defaults 1:1).
     # Ставятся на каждый ответ, если контроллер не выставил своё.
-    property default_headers : Hash(String, String) = {
+    attr_accessor default_headers : Hash(String, String) = {
       "X-Frame-Options"                   => "SAMEORIGIN",
       "X-XSS-Protection"                  => "0",
       "X-Content-Type-Options"            => "nosniff",
@@ -255,7 +256,7 @@ module CRails
     # компиляторы css/js url-rewrite + sourceMappingURL). Прекомпрессия
     # versions = [".gz", ".br"] — CRails-расширение (static.cr отдаёт
     # соседи по Accept-Encoding; гем ничего подобного не пишет).
-    property assets : Propshaft::Config = begin
+    attr_accessor assets : Propshaft::Config = begin
       assets = Propshaft::Config.new
       assets.versions = [".gz", ".br"]
       assets
@@ -280,8 +281,8 @@ module CRails
   end
 
   class Application
-    getter routes : CRails::Routes::RouteSet
-    getter config : CRails::Config
+    attr_reader routes : CRails::Routes::RouteSet
+    attr_reader config : CRails::Config
     getter? initialized = false
     @middleware_chain : HTTP::Handler?
     @key_generators = {} of String => ActiveSupport::CachingKeyGenerator
@@ -427,20 +428,20 @@ module CRails
 
     # Set by the app's app/bots/** glue (`bin/app bot:poll telegram`);
     # keeps railties free of an action_bot dependency.
-    property bot_poller : Proc(String, Nil)? = nil
+    attr_accessor bot_poller : Proc(String, Nil)? = nil
 
     # Роли процессов (bin/app worker / bin/app scheduler): хук задаётся
     # glue-кодом приложения в src/app.cr (например, Kiq::Launcher или
     # SolidQueue-воркер) — railties не зависит от очередей.
-    property worker : Proc(Nil)? = nil
-    property scheduler : Proc(Nil)? = nil
+    attr_accessor worker : Proc(Nil)? = nil
+    attr_accessor scheduler : Proc(Nil)? = nil
 
     # Cable-монтаж (аналог ActionCable::Engine: /cable в общем стеке).
     # railties не зависит от action_cable_cr — приложение с кабелем
     # подставляет готовый HTTP::Handler (обычно ActionCable::Server#
     # ws_handler); он встаёт ПЕРЕД middleware-стеком, чтобы upgrade-
     # запросы не проходили RequestId/Logger и не разбирали тело.
-    property cable_handler : HTTP::Handler? = nil
+    attr_accessor cable_handler : HTTP::Handler? = nil
 
     private def serve(args : Array(String)) : Nil
       port = config.port
