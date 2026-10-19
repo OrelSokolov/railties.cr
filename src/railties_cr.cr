@@ -291,6 +291,9 @@ module CRails
     def initialize
       @routes = CRails::Routes::RouteSet.new
       @config = CRails::Config.new
+      # Named route helpers (`*_path`/`*_url`, Routes::UrlHelpers) resolve
+      # against the application's route set.
+      CRails::Routes::UrlHelpers.route_set = @routes
     end
 
     # Сборка ассетов (аналог Rails.application.assets): load path из
