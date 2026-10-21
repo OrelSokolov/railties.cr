@@ -22,6 +22,7 @@
 # counterpart yet — see ../PLAN.md.
 
 require "http/server/handler"
+require "active_support_cr"
 
 module CRails
   class MiddlewareStack
@@ -408,6 +409,10 @@ module CRails
           CRails.logger.info { Observability.log_processing(rid, match.route.controller, match.route.action, nil) }
         end
         controller = klass.new(context)
+        # ActiveSupport::Executor semantics: CurrentAttributes are
+        # per-request globals — reset them before dispatching so no
+        # value leaks from a previous request.
+        ActiveSupport::CurrentAttributes.reset_all
         controller.__set_params(match.params, match.route.controller, match.route.action)
         controller.__run_action(match.route.action)
       end

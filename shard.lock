@@ -10,7 +10,7 @@ shards:
 
   active_support_cr:
     git: https://github.com/orelsokolov/active_support.cr.git
-    version: 0.1.7
+    version: 0.1.8
 
   attr_reader_cr:
     git: https://github.com/orelsokolov/attr_reader.cr.git

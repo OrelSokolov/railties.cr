@@ -237,3 +237,53 @@ describe "integration session (rails 8.1.4 oracle)" do
       .should eq INTEGRATION_EXPECTED["delete_with_query"]
   end
 end
+
+# --- CRails-specific: CurrentAttributes reset between requests -------
+# (no Rails oracle case — ActiveSupport::Executor semantics; the port
+# resets CurrentAttributes in the request dispatcher, see
+# src/middleware.cr `dispatch`.)
+
+class SpecCurrent < ActiveSupport::CurrentAttributes
+  attribute user: String?
+end
+
+class CurrentEchoController < ActionController::Base
+  def set_it
+    SpecCurrent.user = params["u"].to_s
+    render plain: "set"
+  end
+
+  def read_it
+    render plain: "user=#{SpecCurrent.user.inspect}"
+  end
+end
+
+APP_CURRENT = CRails::Application.new.tap do |app|
+  app.routes.draw do
+    get "/cur/set", to: "current_echo#set_it"
+    get "/cur/read", to: "current_echo#read_it"
+  end
+end
+
+module CurrentRun
+  class_property session : ActionDispatch::IntegrationSession?
+end
+
+def crun
+  CurrentRun.session ||= ActionDispatch::IntegrationSession.new(APP_CURRENT)
+end
+
+describe "current attributes reset between requests" do
+  it "value set in one request is nil in the next" do
+    crun.get "/cur/set", params: {"u" => "david"}
+    crun.response.not_nil!.body.should eq "set"
+    SpecCurrent.user.should eq "david" # visible until the next dispatch
+
+    # next dispatch resets before the action runs — no leak
+    crun.get "/cur/read"
+    crun.response.not_nil!.body.should eq "user=nil"
+
+    crun.get "/cur/read" # and stays reset on further requests
+    crun.response.not_nil!.body.should eq "user=nil"
+  end
+end
