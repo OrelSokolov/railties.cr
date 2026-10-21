@@ -294,6 +294,13 @@ module CRails
       # Named route helpers (`*_path`/`*_url`, Routes::UrlHelpers) resolve
       # against the application's route set.
       CRails::Routes::UrlHelpers.route_set = @routes
+      # Polymorphic form URLs (`form_with model:` without `url:`)
+      # resolve against the same route set — the FormHelper hook points
+      # at UrlHelpers.polymorphic_path (action_view_cr cannot reach the
+      # route set itself).
+      ActionView::Helpers::FormHelper.polymorphic_path = ->(models : Array(ActionView::FormModel)) do
+        CRails::Routes::UrlHelpers.polymorphic_path(models)
+      end
     end
 
     # Сборка ассетов (аналог Rails.application.assets): load path из
