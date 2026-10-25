@@ -323,6 +323,13 @@ module CRails
       self
     end
 
+    # Rails.application.configure do |config| ... end (railties 8.1):
+    # окружения конфигурируют приложение блоком. В Crystal блок принимает
+    # config явно (instance_eval недоступен).
+    def configure(&block : CRails::Config -> Nil) : Nil
+      yield config
+    end
+
     # config/credentials.yml.enc + config/master.key (см. credentials.cr)
     def credentials : CRails::EncryptedConfiguration
       @credentials ||= CRails.credentials
