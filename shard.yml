@@ -1,6 +1,10 @@
 name: railties_cr
-version: 0.1.16
+version: 0.1.17
 crystal: ">= 1.21.0"
+development_dependencies:
+  carat:
+    github: OrelSokolov/carat.cr
+    version: ~> 0.4.0
 dependencies:
   attr_reader_cr:
     github: OrelSokolov/attr_reader.cr
@@ -25,3 +29,11 @@ dependencies:
 targets:
   crails:
     main: src/crails_cli.cr
+
+# Контракт поставки carat (OrelSokolov/carat): ключ targets шарды
+# игнорируют. GlobalInstaller не запускает shards install — зависимости
+# (включая icr) ставятся через prebuild.
+binaries:
+  crails:
+    main: src/crails_cli.cr
+    prebuild: shards install
